@@ -14,7 +14,7 @@ let createNewOrder = async (req, res) => {
 }
 let getAllOrders = async (req, res) => {
     try {
-        let data = await orderService.getAllOrders(req.query);
+        let data = await orderService.getAllOrders(req.query.statusId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -48,9 +48,9 @@ let updateStatusOrder = async (req, res) => {
         })
     }
 }
-let getAllOrdersByUser = async (req, res) => {
+let getAllOrdersByUserId = async (req, res) => {
     try {
-        let data = await orderService.getAllOrdersByUser(req.query.userId);
+        let data = await orderService.getAllOrdersByUserId(req.query.userId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -65,5 +65,5 @@ module.exports = {
     getAllOrders: getAllOrders,
     getDetailOrderById: getDetailOrderById,
     updateStatusOrder: updateStatusOrder,
-    getAllOrdersByUser: getAllOrdersByUser,
+    getAllOrdersByUserId: getAllOrdersByUserId,
 }

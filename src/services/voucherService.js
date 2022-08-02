@@ -1,3 +1,4 @@
+import _ from "lodash";
 import db from "../models/index";
 let createNewVoucher = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -8,17 +9,22 @@ let createNewVoucher = (data) => {
                     errMessage: 'Thiếu các thông số bắt buộc!'
                 })
             } else {
-                let res = await db.Voucher.create({
-                    fromDate: data.fromDate,
-                    toDate: data.toDate,
-                    typeVoucherId: data.typeVoucherId,
-                    number: data.number,
-                    codeVoucher: data.codeVoucher
+                const [res, created] = await db.Voucher.findOrCreate({
+                    where: {
+                        codeVoucher: data.codeVoucher
+                    },
+                    defaults: {
+                        fromDate: data.fromDate,
+                        toDate: data.toDate,
+                        typeVoucherId: data.typeVoucherId,
+                        number: data.number,
+                        codeVoucher: data.codeVoucher
+                    }
                 })
-                if (!res) {
+                if (!created) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Thêm mới mã giảm giá thất bại!'
+                        errMessage: `Mã giảm giá ${data.codeVoucher}đã tồn tại! Hãy xoá mã giảm giá cũ trước khi thêm mới`
                     })
                 } else {
                     resolve({
@@ -212,33 +218,39 @@ let saveUserVoucher = (data) => {
         }
     })
 }
-let getAllVoucherByUserId = (data) => {
+let getAllVoucherByUserId = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.id) {
+            if (!id) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Thiếu các thông số bắt buộc!'
                 })
             } else {
-                let res = await db.User.findAll({
+                let res = await db.User.findOne({
                     where: {
-                        id: data.id,
+                        id: id,
                     },
                     include: {
-                        model: db.Voucher, as: 'VoucherUserUsedData'
+                        model: db.Voucher, as: 'VoucherOfUser',
+                        include: {
+                            model: db.TypeVoucher, as: 'typeVoucherOfVoucherData',
+                        }
                     },
+                    attributes: ['id', 'email'],
                     raw: false
                 })
-                if (!res) {
+                if (res && !_.isEmpty(res)) {
+                    let arrTemp = []
+                    arrTemp = res.VoucherOfUser.filter(item => +item.VoucherUsed.status === 0)
                     resolve({
                         errCode: 0,
-                        errMessage: "Không tìm thấy mã giảm giá người dùng đã sử dụng!"
+                        data: arrTemp
                     })
                 } else {
                     resolve({
                         errCode: 0,
-                        data: res
+                        errMessage: "Không tìm thấy mã giảm giá người dùng đã sử dụng!"
                     })
                 }
             }

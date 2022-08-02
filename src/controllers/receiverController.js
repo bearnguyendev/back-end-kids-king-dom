@@ -1,8 +1,8 @@
-import bannerService from '../services/bannerService';
+import receiverService from '../services/receiverService';
 
-let createNewBanner = async (req, res) => {
+let createNewReceiver = async (req, res) => {
     try {
-        let data = await bannerService.createNewBanner(req.body);
+        let data = await receiverService.createNewReceiver(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -12,9 +12,9 @@ let createNewBanner = async (req, res) => {
         })
     }
 }
-let getDetailBannerById = async (req, res) => {
+let getAllReceiverByUserId = async (req, res) => {
     try {
-        let data = await bannerService.getDetailBannerById(req.query.id);
+        let data = await receiverService.getAllReceiverByUserId(req.query.userId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -24,9 +24,9 @@ let getDetailBannerById = async (req, res) => {
         })
     }
 }
-let getAllBanner = async (req, res) => {
+let deleteReceiver = async (req, res) => {
     try {
-        let data = await bannerService.getAllBanner();
+        let data = await receiverService.deleteReceiver(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -36,13 +36,9 @@ let getAllBanner = async (req, res) => {
         })
     }
 }
-let getListBanner = async (req, res) => {
+let editReceiver = async (req, res) => {
     try {
-        let limit = req.query.limit;
-        if (!limit) {
-            limit = 10;
-        }
-        let data = await bannerService.getListBanner(+limit);
+        let data = await receiverService.editReceiver(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -52,9 +48,9 @@ let getListBanner = async (req, res) => {
         })
     }
 }
-let updateBanner = async (req, res) => {
+let getDetailReceiverById = async (req, res) => {
     try {
-        let data = await bannerService.updateBanner(req.body);
+        let data = await receiverService.getDetailReceiverById(req.query.id);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -64,9 +60,9 @@ let updateBanner = async (req, res) => {
         })
     }
 }
-let deleteBanner = async (req, res) => {
+let handleChangeStatusReceiver = async (req, res) => {
     try {
-        let data = await bannerService.deleteBanner(req.body);
+        let data = await receiverService.handleChangeStatusReceiver(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -76,25 +72,11 @@ let deleteBanner = async (req, res) => {
         })
     }
 }
-let changeStatusBanner = async (req, res) => {
-    try {
-        let data = await bannerService.changeStatusBanner(req.body);
-        return res.status(200).json(data);
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
-        })
-    }
-}
-
 module.exports = {
-    createNewBanner: createNewBanner,
-    getDetailBannerById: getDetailBannerById,
-    getAllBanner: getAllBanner,
-    getListBanner: getListBanner,
-    updateBanner: updateBanner,
-    deleteBanner: deleteBanner,
-    changeStatusBanner: changeStatusBanner
+    createNewReceiver: createNewReceiver,
+    getAllReceiverByUserId: getAllReceiverByUserId,
+    deleteReceiver: deleteReceiver,
+    editReceiver: editReceiver,
+    getDetailReceiverById: getDetailReceiverById,
+    handleChangeStatusReceiver: handleChangeStatusReceiver
 }

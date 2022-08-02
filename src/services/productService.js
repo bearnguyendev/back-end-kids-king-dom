@@ -1,3 +1,4 @@
+import _ from "lodash";
 import db from "../models/index";
 const { Op } = require("sequelize");
 let checkRequiredFields = (inputData) => {
@@ -139,63 +140,118 @@ let updateProduct = (data) => {
         }
     })
 }
-let getAllProduct = (statusId) => {
+let getAllProduct = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!statusId) {
+            if (!data.statusId) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Thiếu các thông số bắt buộc!',
-                    data: []
+                    res: []
                 });
             }
-            let data = '';
             let conditionObject = {
                 include: [
-                    { model: db.Allcode, as: 'categoryData', attributes: ['value'] },
-                    { model: db.Allcode, as: 'brandData', attributes: ['value'] },
-                    { model: db.Allcode, as: 'statusData', attributes: ['value'] },
-                    { model: db.Allcode, as: 'warrantyData', attributes: ['value'] },
+                    { model: db.Allcode, as: 'categoryData', attributes: ['value', 'keyMap'] },
+                    { model: db.Allcode, as: 'brandData', attributes: ['value', 'keyMap'] },
+                    { model: db.Allcode, as: 'statusData', attributes: ['value', 'keyMap'] },
+                    { model: db.Allcode, as: 'warrantyData', attributes: ['value', 'keyMap'] },
                     { model: db.ProductImage, as: 'productImageData' },
                 ],
                 raw: false,
                 nest: true,
             }
-            if (statusId === 'ALL') {
-                data = await db.Product.findAll(conditionObject)
-                if (data && data.length > 0) {
-                    data.map((product) => {
-                        return (
-                            product.productImageData && product.productImageData.length > 0 &&
-                            product.productImageData.map((item) => {
-                                return (
-                                    item.image = new Buffer.from(item.image, 'base64').toString('binary')
-                                )
-                            })
-                        )
-                    })
-                }
+            if (data.statusId && data.statusId !== 'ALL') conditionObject.where = { statusId: data.statusId }
+            if (data.categoryId && data.categoryId !== 'ALL') conditionObject.where = { ...conditionObject.where, categoryId: data.categoryId }
+            if (data.brandId && data.brandId !== 'ALL') conditionObject.where = { ...conditionObject.where, brandId: data.brandId }
+            if (data.valueSearch && data.valueSearch !== 'ALL') conditionObject.where = { ...conditionObject.where, name: { [Op.substring]: data.valueSearch } }
+            if (data.sortName && data.sortName === "true") {
+                conditionObject.order = [['name', 'ASC']]
+            } else if (data.sortName && data.sortName === "false") {
+                conditionObject.order = [['name', 'DESC']]
             }
-            if (statusId && statusId !== 'ALL') {
-                let conditionObject1 = { where: { statusId: statusId }, ...conditionObject }
-                data = await db.Product.findAll(conditionObject1)
-                if (data && data.length > 0) {
-                    data.map((product) => {
-                        return (
-                            product.productImageData && product.productImageData.length > 0 &&
-                            product.productImageData.map((item) => {
-                                return (
-                                    item.image = new Buffer.from(item.image, 'base64').toString('binary')
-                                )
-                            })
-                        )
-                    })
-                }
+            if (data.sortPrice && data.sortPrice === "true") {
+                conditionObject.order = [['discountPrice', 'ASC']]
+            } else if (data.sortPrice && data.sortPrice === "false") {
+                conditionObject.order = [['discountPrice', 'DESC']]
+            }
+            if (data.sortPercent && data.sortPercent === "true") {
+                conditionObject.order = [['percentDiscount', 'ASC']]
+            } else if (data.sortPercent && data.sortPercent === "false") {
+                conditionObject.order = [['percentDiscount', 'DESC']]
+            }
+            if (data.sortView && data.sortView === "true") {
+                conditionObject.order = [['view', 'DESC']]
+            }
+            if (data.sortCreatedAt && data.sortCreatedAt === "true") {
+                conditionObject.order = [['createdAt', 'DESC']]
+            }
+            let res = await db.Product.findAll(conditionObject)
+            if (res && res.length > 0) {
+                res.map((product) => {
+                    return (
+                        product.productImageData && product.productImageData.length > 0 &&
+                        product.productImageData.map((item) => {
+                            return (
+                                item.image = new Buffer.from(item.image, 'base64').toString('binary')
+                            )
+                        })
+                    )
+                })
             }
             resolve({
                 errCode: 0,
-                data
+                data: res
             })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let getTopProductHomePage = (limit, typeSort) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!limit || !typeSort) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    data: []
+                });
+            } else {
+                let res = await db.Product.findAll({
+                    where: { statusId: 'S1' },
+                    order: [
+                        [typeSort, 'DESC'],
+                    ],
+                    include: [
+                        { model: db.Allcode, as: 'categoryData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'brandData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'statusData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'warrantyData', attributes: ['value'] },
+                        { model: db.ProductImage, as: 'productImageData' },
+                    ],
+                    limit: limit,
+                    raw: false,
+                    nest: true
+                })
+                if (res && res.length > 0) {
+                    res.map((product) => {
+                        return (
+                            product.productImageData && product.productImageData.length > 0 &&
+                            product.productImageData.map((item) => {
+                                return (
+                                    item.image = new Buffer.from(item.image, 'base64').toString('binary')
+                                )
+                            })
+                        )
+                    })
+                }
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
+            }
+
         } catch (error) {
             reject(error)
         }
@@ -204,19 +260,40 @@ let getAllProduct = (statusId) => {
 let searchProduct = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.search) {
+            if (!data.valueSearch) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: 'Chưa nhập tên phẩm cần tìm!'
                 })
             } else {
                 let res = await db.Product.findAll({
                     where: {
                         name: {
-                            [Op.like]: `%${data.search}%`
+                            [Op.substring]: data.valueSearch
                         }
-                    }
+                    },
+                    include: [
+                        { model: db.Allcode, as: 'categoryData', attributes: ['value', 'keyMap'] },
+                        { model: db.Allcode, as: 'brandData', attributes: ['value', 'keyMap'] },
+                        { model: db.Allcode, as: 'statusData', attributes: ['value', 'keyMap'] },
+                        { model: db.Allcode, as: 'warrantyData', attributes: ['value', 'keyMap'] },
+                        { model: db.ProductImage, as: 'productImageData' },
+                    ],
+                    raw: false,
+                    nest: true,
                 });
+                if (res && res.length > 0) {
+                    res.map((product) => {
+                        return (
+                            product.productImageData && product.productImageData.length > 0 &&
+                            product.productImageData.map((item) => {
+                                return (
+                                    item.image = new Buffer.from(item.image, 'base64').toString('binary')
+                                )
+                            })
+                        )
+                    })
+                }
                 resolve({
                     errCode: 0,
                     data: res
@@ -280,27 +357,76 @@ let deleteProduct = (id) => {
             } else {
                 let product = await db.Product.findOne({
                     where: { id: id },
+                    include: { model: db.OrderProduct, as: 'OrderDetailData', raw: false },
                     raw: false
                 })
-
-                if (product) {
-                    await db.ProductImage.destroy({
-                        where: { productId: id }
-                    })
-                    await db.Product.destroy({
-                        where: { id: id }
-                    });
+                let isCheck = product && product.OrderDetailData && product.OrderDetailData.every(item => +item.OrderDetail.productId === +id)
+                if (isCheck === true) {
                     resolve({
-                        errCode: 0,
-                        errMessage: 'Xoá sản phẩm thành công!'
+                        errCode: 3,
+                        errMessage: 'Sản phẩm đã có người mua không thể xoá!'
                     })
                 } else {
-                    resolve({
-                        errCode: 2,
-                        errMessage: 'Không tìm thấy sản phẩm!'
-                    })
+                    if (product) {
+                        await db.ProductImage.destroy({
+                            where: { productId: id }
+                        })
+                        await db.Product.destroy({
+                            where: { id: id }
+                        });
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Xoá sản phẩm thành công!'
+                        })
+                    } else {
+                        resolve({
+                            errCode: 2,
+                            errMessage: 'Không tìm thấy sản phẩm!'
+                        })
+                    }
                 }
             }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let getDetailProductById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!'
+                })
+            } else {
+                let res = await db.Product.findOne({
+                    where: { id: id },
+                    include: [
+                        { model: db.Allcode, as: 'categoryData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'brandData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'statusData', attributes: ['value'] },
+                        { model: db.Allcode, as: 'warrantyData', attributes: ['value'] },
+                        { model: db.ProductImage, as: 'productImageData' },
+                    ],
+                    raw: false,
+                    nest: true
+                })
+                res && !_.isEmpty(res) && res.productImageData && res.productImageData.length > 0 &&
+                    res.productImageData.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))
+
+                let product = await db.Product.findOne({
+                    where: { id: id },
+                    raw: false
+                })
+                product.view += 1
+                await product.save()
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
+            }
+
         } catch (error) {
             reject(error)
         }
@@ -452,15 +578,39 @@ let deleteProductImage = (id) => {
     })
 }
 
+let getTopProductSold = (limit) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let res = await db.OrderProduct.findAll({
+                where: { statusId: 'S6' },
+                include: [
+                    { model: db.OrderDetail, as: 'orderData', attributes: ['productId'] },
+                ],
+                limit: limit,
+                raw: false,
+                nest: true
+            })
+            resolve({
+                errCode: 0,
+                data: res
+            })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     createNewProduct: createNewProduct,
     updateProduct: updateProduct,
     getAllProduct: getAllProduct,
+    getTopProductHomePage: getTopProductHomePage,
     searchProduct: searchProduct,
     changeStatusProduct: changeStatusProduct,
     deleteProduct: deleteProduct,
+    getDetailProductById: getDetailProductById,
     createNewProductImage: createNewProductImage,
     updateProductImage: updateProductImage,
     getAllProductImageFromProduct: getAllProductImageFromProduct,
     deleteProductImage: deleteProductImage,
+    getTopProductSold: getTopProductSold
 }

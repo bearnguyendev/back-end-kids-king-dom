@@ -26,6 +26,9 @@ module.exports = {
             note: {
                 type: Sequelize.STRING
             },
+            totalPayment: {
+                type: Sequelize.BIGINT
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

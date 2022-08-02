@@ -8,6 +8,9 @@ import typeShipController from "../controllers/typeShipController";
 import typeVoucherController from "../controllers/typeVoucherController";
 import voucherController from "../controllers/voucherController";
 import orderController from "../controllers/orderController";
+import cartController from "../controllers/cartController";
+import receiverController from "../controllers/receiverController";
+import commentController from "../controllers/commentController";
 
 let router = express.Router();
 let initApiRoutes = (app) => {
@@ -34,11 +37,13 @@ let initApiRoutes = (app) => {
     router.post('/create-new-product', productController.createNewProduct);
     router.put('/update-product', productController.updateProduct);
     router.get('/get-all-product', productController.getAllProduct);
+    router.get('/get-top-product-home-page', productController.getTopProductHomePage);
     router.put('/change-status-product', productController.changeStatusProduct);
     router.delete('/delete-product', productController.deleteProduct);
     router.get('/search-product', productController.searchProduct);
+    router.get('/get-detail-product-by-id', productController.getDetailProductById);
+    router.get('/get-top-product-sold', productController.getTopProductSold);
 
-    //router.get('/get-detail-product-by-id', productController.getDetailProductById);
     router.post('/create-new-product-image', productController.createNewProductImage);
     router.put('/update-product-image', productController.updateProductImage);
     router.get('/get-all-product-image-from-product', productController.getAllProductImageFromProduct);
@@ -86,7 +91,23 @@ let initApiRoutes = (app) => {
     router.get('/get-all-order', orderController.getAllOrders);
     router.get('/get-detail-order', orderController.getDetailOrderById);
     router.put('/update-status-order', orderController.updateStatusOrder);
-    router.get('/get-all-order-by-user', orderController.getAllOrdersByUser);
+    router.get('/get-all-order-by-user-id', orderController.getAllOrdersByUserId);
+
+    router.post('/add-cart', cartController.addItemCart);
+    router.get('/get-all-cart-by-user-id', cartController.getAllCartByUserId);
+    router.delete('/delete-item-cart', cartController.deleteItemCart);
+
+    router.post('/create-new-receiver', receiverController.createNewReceiver);
+    router.get('/get-all-receiver-by-user-id', receiverController.getAllReceiverByUserId);
+    router.get('/get-detail-receiver-by-id', receiverController.getDetailReceiverById);
+    router.put('/update-receiver', receiverController.editReceiver);
+    router.put('/change-status-receiver', receiverController.handleChangeStatusReceiver);
+    router.delete('/delete-receiver', receiverController.deleteReceiver);
+
+    router.post('/create-new-comment', commentController.createNewComment)
+    router.post('/reply-comment', commentController.ReplyComment)
+    router.get('/get-all-comment-by-product-id', commentController.getAllCommentByProductId)
+    router.delete('/delete-comment', commentController.deleteComment)
 
     return app.use("/api", router);
 }

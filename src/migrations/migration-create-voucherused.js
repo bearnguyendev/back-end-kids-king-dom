@@ -9,7 +9,7 @@ module.exports = {
                 type: Sequelize.INTEGER
             },
             voucherId: {
-                type: Sequelize.STRING,
+                type: Sequelize.INTEGER,
                 allowNull: false,
 
             },

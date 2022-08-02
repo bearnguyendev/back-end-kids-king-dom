@@ -178,13 +178,13 @@ let editAUser = (data) => {
                     user.phoneNumber = data.phoneNumber;
                     user.genderId = data.genderId;
                     user.roleId = data.roleId;
-                    if (data.avatar) {
-                        user.image = data.avatar;
+                    if (data.image) {
+                        user.image = data.image;
                     }
                     await user.save();
                     resolve({
                         errCode: 0,
-                        errMessage: 'Cập nhật người dùng thành công!'
+                        errMessage: 'Cập nhật thông tin thành công!'
                     })
                 } else {
                     resolve({
@@ -243,7 +243,6 @@ let handleLogin = (data) => {
                 let isExist = await checkUserEmail(data.email);
                 if (isExist === true) {
                     let user = await db.User.findOne({
-                        attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id', 'image', 'statusId'],
                         where: { email: data.email },
                         raw: true
                     })
@@ -367,7 +366,7 @@ let sendVerifyEmail = (data) => {
 let handleVerifyEmail = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.id || !data.token) {
+            if (!data.userId || !data.token) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Thiếu các thông số bắt buộc!'
@@ -375,7 +374,7 @@ let handleVerifyEmail = (data) => {
             } else {
                 let user = await db.User.findOne({
                     where: {
-                        id: data.id,
+                        id: data.userId,
                         userToken: data.token
                     },
                     attributes: {
@@ -545,5 +544,5 @@ module.exports = {
     handleVerifyEmail: handleVerifyEmail,
     sendForgotPassword: sendForgotPassword,
     handleResetPassword: handleResetPassword,
-    changeStatusUser: changeStatusUser
+    changeStatusUser: changeStatusUser,
 }

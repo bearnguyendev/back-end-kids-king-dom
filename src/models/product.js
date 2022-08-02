@@ -9,7 +9,9 @@ module.exports = (sequelize, DataTypes) => {
             Product.belongsTo(models.Allcode, { foreignKey: 'statusId', targetKey: 'keyMap', as: 'statusData' })
             Product.belongsTo(models.Allcode, { foreignKey: 'warrantyId', targetKey: 'keyMap', as: 'warrantyData' })
             Product.hasMany(models.ProductImage, { foreignKey: 'productId', as: 'productImageData' })
-            Product.hasMany(models.Cart, { foreignKey: 'productId', as: 'productData' })
+            Product.belongsToMany(models.User, { through: { model: models.Cart, unique: false }, foreignKey: 'productId', as: 'ProductUserCartData' });
+            Product.belongsToMany(models.OrderProduct, { through: { model: models.OrderDetail, unique: false }, foreignKey: 'productId', as: 'OrderDetailData' });
+            Product.hasMany(models.Comment, { foreignKey: "productId", as: "commentProductData" })
         }
     };
     Product.init({

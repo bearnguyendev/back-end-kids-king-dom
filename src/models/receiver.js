@@ -8,15 +8,16 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Receiver.hasMany(models.OrderProduct, { foreignKey: 'receiverId', as: 'receiverData' })
+            Receiver.hasMany(models.OrderProduct, { foreignKey: 'receiverId', as: 'receiverOrderData' })
+            Receiver.belongsTo(models.User, { foreignKey: 'userId', targetKey: 'id', as: 'userData' })
         }
     };
     Receiver.init({
         userId: DataTypes.INTEGER,
         name: DataTypes.STRING,
         address: DataTypes.STRING,
-        email: DataTypes.STRING,
         phoneNumber: DataTypes.STRING,
+        status: DataTypes.INTEGER,
     }, {
         sequelize,
         modelName: 'Receiver',

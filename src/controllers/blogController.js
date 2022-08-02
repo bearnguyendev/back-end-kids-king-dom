@@ -42,7 +42,7 @@ let getListBlog = async (req, res) => {
         if (!limit) {
             limit = 10;
         }
-        let data = await blogService.getListBlog(req.query);
+        let data = await blogService.getListBlog(+limit);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)

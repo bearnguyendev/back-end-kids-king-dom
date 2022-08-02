@@ -1,4 +1,5 @@
 import db from "../models/index";
+const { Op } = require("sequelize");
 let getAllCode = (type) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -31,18 +32,17 @@ let createNewAllCode = (data) => {
                 })
             } else {
                 const [res, created] = await db.Allcode.findOrCreate({
-                    where: { keyMap: data.keyMap },
+                    where: { [Op.or]: [{ keyMap: data.keyMap }, { value: data.value }] },
                     defaults: {
                         type: data.type,
                         value: data.value,
                         keyMap: data.keyMap
                     }
                 })
-
                 if (!created) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Mã đã tồn tại !'
+                        errMessage: 'Đã tồn tại trên hệ thống!'
                     })
                 } else {
                     resolve({
@@ -129,7 +129,7 @@ let getListAllCode = (data) => {
 
                 let res = await db.Allcode.findAll({
                     where: { type: data.type },
-                    limit: +data.limit
+                    limit: +data.limit,
                 })
                 resolve({
                     errCode: 0,

@@ -1,6 +1,6 @@
 import db from "../models/index";
 require('dotenv').config();
-
+const { Op } = require("sequelize");
 let createNewBlog = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -67,50 +67,69 @@ let getDetailBlogById = (id) => {
         }
     })
 }
-let getAllBlog = () => {
+let getAllBlog = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let res = await db.Blog.findAll({
-                include: [
-                    { model: db.Allcode, as: 'subjectData', attributes: ['value', 'keyMap'] },
-                ],
-                raw: false,
-                nest: true
-            })
-            if (res && res.length > 0) {
-                res.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))
+            if (!data.statusId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!'
+                })
+            } else {
+                let conditionObject = {
+                    include: [
+                        { model: db.Allcode, as: 'subjectData', attributes: ['value', 'keyMap'] },
+                    ],
+                    raw: false,
+                    nest: true
+                }
+                if (data.statusId && data.statusId !== 'ALL') conditionObject.where = { statusId: data.statusId }
+                if (data.subjectId && data.subjectId !== 'ALL') conditionObject.where = { ...conditionObject.where, subjectId: data.subjectId }
+                if (data.valueSearch && data.valueSearch !== 'ALL') conditionObject.where = { ...conditionObject.where, title: { [Op.substring]: data.valueSearch } }
+                let res = await db.Blog.findAll(conditionObject)
+                if (res && res.length > 0) {
+                    res.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))
+                }
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
             }
-            resolve({
-                errCode: 0,
-                data: res
-            })
-
-
-
         } catch (error) {
             reject(error)
         }
     })
 }
-let getListBlog = (data) => {
+let getListBlog = (limit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let res = await db.Blog.findAll({
-                where: { statusId: 'S1' },
-                limit: +data.limit,
-                include: [
-                    { model: db.Allcode, as: 'subjectData', attributes: ['value', 'keyMap'] },
-                ],
-                raw: false,
-                nest: true
-            })
-            if (res && res.length > 0) {
-                res.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))
+            if (!limit) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    data: []
+                });
+            } else {
+                let res = await db.Blog.findAll({
+                    where: { statusId: 'S1' },
+                    limit: limit,
+                    order: [
+                        ['createdAt', 'DESC'],
+                    ],
+                    include: [
+                        { model: db.Allcode, as: 'subjectData', attributes: ['value', 'keyMap'] },
+                    ],
+                    raw: false,
+                    nest: true
+                })
+                if (res && res.length > 0) {
+                    res.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))
+                }
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
             }
-            resolve({
-                errCode: 0,
-                data: res
-            })
         } catch (error) {
             reject(error)
         }
@@ -146,7 +165,7 @@ let updateBlog = (data) => {
                     } else {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Ok'
+                            errMessage: 'Chỉnh sửa bài đăng thành công!'
                         })
                     }
                 } else {

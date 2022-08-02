@@ -11,8 +11,9 @@ module.exports = (sequelize, DataTypes) => {
             OrderProduct.belongsTo(models.TypeShip, { foreignKey: 'typeShipId', targetKey: 'id', as: 'typeShipData' })
             OrderProduct.belongsTo(models.Voucher, { foreignKey: 'voucherId', targetKey: 'id', as: 'voucherData' })
             OrderProduct.belongsTo(models.Allcode, { foreignKey: 'statusId', targetKey: 'keyMap', as: 'statusOrderData' })
-            OrderProduct.belongsTo(models.Receiver, { foreignKey: 'receiverId', targetKey: 'id', as: 'receiverData' })
+            OrderProduct.belongsTo(models.Receiver, { foreignKey: 'receiverId', targetKey: 'id', as: 'receiverOrderData' })
             OrderProduct.hasMany(models.OrderDetail, { foreignKey: 'orderId', as: 'orderData' })
+            OrderProduct.belongsToMany(models.Product, { through: { model: models.OrderDetail, unique: false }, foreignKey: 'orderId', as: 'OrderDetailData' });
         }
     };
     OrderProduct.init({
@@ -22,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         typeShipId: DataTypes.INTEGER,
         voucherId: DataTypes.STRING,
         note: DataTypes.STRING,
+        totalPayment: DataTypes.BIGINT,
     }, {
         sequelize,
         modelName: 'OrderProduct',

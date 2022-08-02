@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     };
     VoucherUsed.init({
-        voucherId: DataTypes.STRING,
+        voucherId: DataTypes.INTEGER,
         userId: DataTypes.INTEGER,
         status: DataTypes.INTEGER
     }, {

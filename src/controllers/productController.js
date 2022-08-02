@@ -25,7 +25,21 @@ let updateProduct = async (req, res) => {
 }
 let getAllProduct = async (req, res) => {
     try {
-        let data = await productService.getAllProduct(req.query.statusId);
+        let data = await productService.getAllProduct(req.query);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
+let getTopProductHomePage = async (req, res) => {
+    try {
+        let limit = req.query.limit;
+        if (!limit) limit = 10;
+        let data = await productService.getTopProductHomePage(+limit, req.query.typeSort);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -49,7 +63,7 @@ let deleteProduct = async (req, res) => {
 }
 let getDetailProductById = async (req, res) => {
     try {
-        let data = await productService.getAllProduct(req.query.id);
+        let data = await productService.getDetailProductById(req.query.id);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -132,10 +146,25 @@ let searchProduct = async (req, res) => {
         })
     }
 }
+let getTopProductSold = async (req, res) => {
+    try {
+        let limit = req.query.limit;
+        if (!limit) limit = 10;
+        let data = await productService.getTopProductSold(+limit);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
 module.exports = {
     createNewProduct: createNewProduct,
     updateProduct: updateProduct,
     getAllProduct: getAllProduct,
+    getTopProductHomePage: getTopProductHomePage,
     deleteProduct: deleteProduct,
     changeStatusProduct: changeStatusProduct,
     getDetailProductById: getDetailProductById,
@@ -143,6 +172,6 @@ module.exports = {
     updateProductImage: updateProductImage,
     getAllProductImageFromProduct: getAllProductImageFromProduct,
     deleteProductImage: deleteProductImage,
-    searchProduct: searchProduct
-
+    searchProduct: searchProduct,
+    getTopProductSold: getTopProductSold
 }

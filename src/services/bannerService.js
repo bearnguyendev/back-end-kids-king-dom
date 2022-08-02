@@ -68,10 +68,10 @@ let getAllBanner = () => {
     })
 }
 
-let getListBanner = (data) => {
+let getListBanner = (limit) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.limit) {
+            if (!limit) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Thiếu các thông số bắt buộc!'
@@ -79,7 +79,7 @@ let getListBanner = (data) => {
             } else {
                 let res = await db.Banner.findAll({
                     where: { statusId: 'S1' },
-                    limit: +data.limit,
+                    limit: +limit,
                 })
                 if (res && res.length > 0) {
                     res.map(item => item.image = new Buffer.from(item.image, 'base64').toString('binary'))

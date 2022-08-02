@@ -74,7 +74,7 @@ let getDetailVoucherById = async (req, res) => {
 }
 let getAllVoucherByUserId = async (req, res) => {
     try {
-        let data = await voucherService.getAllVoucherByUserId(req.query);
+        let data = await voucherService.getAllVoucherByUserId(req.query.userId);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)

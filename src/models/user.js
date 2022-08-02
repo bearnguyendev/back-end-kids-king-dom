@@ -10,7 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             User.belongsTo(models.Allcode, { foreignKey: 'genderId', targetKey: 'keyMap', as: 'genderData' })
             User.belongsTo(models.Allcode, { foreignKey: 'roleId', targetKey: 'keyMap', as: 'roleData' })
-            User.belongsToMany(models.Voucher, { through: { model: models.VoucherUsed }, foreignKey: 'userId', as: 'VoucherUserUsedData' });
+            User.belongsToMany(models.Voucher, { through: { model: models.VoucherUsed }, foreignKey: 'userId', as: 'VoucherOfUser' });
+            User.belongsToMany(models.Product, { through: { model: models.Cart, unique: false }, foreignKey: 'userId', as: 'ProductUserCartData' });
+            User.hasMany(models.Receiver, { foreignKey: 'userId', as: 'userData' })
+            User.hasOne(models.Comment, { foreignKey: 'userId' })
         }
     };
     User.init({
