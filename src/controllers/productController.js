@@ -51,7 +51,7 @@ let getTopProductHomePage = async (req, res) => {
 }
 let deleteProduct = async (req, res) => {
     try {
-        let data = await productService.deleteProduct(req.body.id);
+        let data = await productService.deleteProduct(req.body);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)

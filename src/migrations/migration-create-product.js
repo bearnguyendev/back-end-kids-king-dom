@@ -50,6 +50,10 @@ module.exports = {
             stock: {
                 type: Sequelize.INTEGER
             },
+            count: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
+            },
             nameDetail: {
                 type: Sequelize.STRING
             },

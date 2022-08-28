@@ -4,49 +4,6 @@ import emailService from "./emailService";
 import { v4 as uuidv4 } from 'uuid';
 require('dotenv').config();
 const salt = bcrypt.genSaltSync(10);
-let createANewUser = (data) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!data.email || !data.password || !data.firstName || !data.lastName || !data.phoneNumber || !data.genderId) {
-                resolve({
-                    errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
-                })
-            } else {
-                let check = await checkUserEmail(data.email);
-                if (check === true) {
-                    resolve({
-                        errCode: 2,
-                        errMessage: 'Email của bạn đã được sử dụng. Vui lòng thử một email khác!'
-                    })
-                } else {
-                    let hashPasswordFromBcrypt = await hashUserPassword(data.password);
-                    await db.User.create({
-                        email: data.email,
-                        password: hashPasswordFromBcrypt,
-                        firstName: data.firstName,
-                        lastName: data.lastName,
-                        address: data.address,
-                        birthday: data.birthday,
-                        phoneNumber: data.phoneNumber,
-                        image: data.avatar,
-                        statusId: 'S1',
-                        genderId: data.genderId,
-                        roleId: data.roleId,
-                        ActiveEmail: 0,
-                        userToken: '',
-                    })
-                    resolve({
-                        errCode: 0,
-                        errMessage: "Thêm mới người dùng thành công!"
-                    })
-                }
-            }
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -60,19 +17,131 @@ let hashUserPassword = (password) => {
 let checkUserEmail = (userEmail) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let user = await db.User.findOne({
-                where: { email: userEmail },
-            });
-            if (user) {
-                resolve(true);
+            const regex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+            if (regex.test(userEmail) === false) {
+                resolve({
+                    isValidEmail: 1,
+                    errMessage: "Email không hợp lệ!"
+                })
             } else {
-                resolve(false);
+                let user = await db.User.findOne({
+                    where: { email: userEmail },
+                });
+                if (user) {
+                    resolve({
+                        isValidEmail: 2,
+                        errMessage: 'Email của bạn đã được sử dụng. Vui lòng thử một email khác!'
+                    });
+                } else {
+                    resolve({ isValidEmail: 0 });
+                }
             }
         } catch (error) {
             reject(error);
         }
     });
 };
+let validatePassword = (passwordInputValue) => {
+    const uppercaseRegExp = /(?=.*?[A-Z])/;
+    const lowercaseRegExp = /(?=.*?[a-z])/;
+    const digitsRegExp = /(?=.*?[0-9])/;
+    const specialCharRegExp = /(?=.*?[#?!@$%^&*-])/;
+    const minLengthRegExp = /.{8,}/;
+    const passwordLength = passwordInputValue.length;
+    const uppercasePassword = uppercaseRegExp.test(passwordInputValue);
+    const lowercasePassword = lowercaseRegExp.test(passwordInputValue);
+    const digitsPassword = digitsRegExp.test(passwordInputValue);
+    const specialCharPassword = specialCharRegExp.test(passwordInputValue);
+    const minLengthPassword = minLengthRegExp.test(passwordInputValue);
+    let errMessage = "";
+    if (passwordLength === 0) {
+        errMessage = "Mật khẩu không được để trống";
+    } else if (!uppercasePassword) {
+        errMessage = "Mật khẩu phải có ít nhất một chữ in hoa";
+    } else if (!lowercasePassword) {
+        errMessage = "Mật khẩu phải có ít nhất một chữ thường";
+    } else if (!digitsPassword) {
+        errMessage = "Mật khẩu phải có ít nhất một chữ số";
+    } else if (!specialCharPassword) {
+        errMessage = "Mật khẩu phải có ít nhất một ký tự đặc biệt";
+    } else if (!minLengthPassword) {
+        errMessage = "Mật khẩu phải có ít nhất 8 ký tự";
+    } else {
+        errMessage = "";
+    }
+    return errMessage;
+};
+let validatePhoneNumber = (phoneNumber) => {
+    const regExp = /^[0-9\b]+$/;
+    const check = regExp.test(phoneNumber)
+    let errMessage = "";
+    if (!check) {
+        errMessage = "Vui lòng nhập số điện thoại là số"
+    } else {
+        errMessage = "";
+    }
+    return errMessage;
+}
+let createANewUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.email || !data.password || !data.firstName || !data.lastName || !data.phoneNumber || !data.genderId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!'
+                })
+            } else {
+                let check = await checkUserEmail(data.email);
+                if (check.isValidEmail !== 0) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: check.errMessage
+                    })
+                } else {
+                    let isValidPw = validatePassword(data.password);
+                    if (isValidPw === "") {
+                        let isValidPhoneNumber = validatePhoneNumber(data.phoneNumber)
+                        if (isValidPhoneNumber === "") {
+                            let hashPasswordFromBcrypt = await hashUserPassword(data.password);
+                            await db.User.create({
+                                email: data.email,
+                                password: hashPasswordFromBcrypt,
+                                firstName: data.firstName,
+                                lastName: data.lastName,
+                                address: data.address,
+                                birthday: data.birthday,
+                                phoneNumber: data.phoneNumber,
+                                image: data.avatar,
+                                statusId: 'S1',
+                                genderId: data.genderId,
+                                roleId: data.roleId,
+                                ActiveEmail: 0,
+                                userToken: '',
+                            })
+                            resolve({
+                                errCode: 0,
+                                errMessage: "Thêm mới người dùng thành công!"
+                            })
+                        } else {
+                            resolve({
+                                errCode: 3,
+                                errMessage: isValidPhoneNumber
+                            })
+                        }
+                    } else {
+                        resolve({
+                            errCode: 2,
+                            errMessage: isValidPw
+                        })
+                    }
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 let getAllUsers = (statusId) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -171,21 +240,29 @@ let editAUser = (data) => {
                     raw: false
                 })
                 if (user) {
-                    user.firstName = data.firstName;
-                    user.lastName = data.lastName;
-                    user.address = data.address;
-                    user.birthday = data.birthday;
-                    user.phoneNumber = data.phoneNumber;
-                    user.genderId = data.genderId;
-                    user.roleId = data.roleId;
-                    if (data.image) {
-                        user.image = data.image;
+                    let isValidPhoneNumber = validatePhoneNumber(data.phoneNumber)
+                    if (isValidPhoneNumber === "") {
+                        user.firstName = data.firstName;
+                        user.lastName = data.lastName;
+                        user.address = data.address;
+                        user.birthday = data.birthday;
+                        user.phoneNumber = data.phoneNumber;
+                        user.genderId = data.genderId;
+                        user.roleId = data.roleId;
+                        if (data.image) {
+                            user.image = data.image;
+                        }
+                        await user.save();
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Cập nhật thông tin thành công!'
+                        })
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: isValidPhoneNumber
+                        })
                     }
-                    await user.save();
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Cập nhật thông tin thành công!'
-                    })
                 } else {
                     resolve({
                         errCode: 2,
@@ -240,8 +317,8 @@ let handleLogin = (data) => {
                 })
             } else {
                 let userData = {};
-                let isExist = await checkUserEmail(data.email);
-                if (isExist === true) {
+                let check = await checkUserEmail(data.email);
+                if (check.isValidEmail === 2) {
                     let user = await db.User.findOne({
                         where: { email: data.email },
                         raw: true
@@ -270,8 +347,14 @@ let handleLogin = (data) => {
                         userData.errMessage = 'Không tìm thấy người dùng!'
                     }
                 } else {
-                    userData.errCode = 5;
-                    userData.errMessage = `Email của bạn không tồn tại trong hệ thống. Vui lòng thử một email khác!`
+                    if (check.isValidEmail === 1) {
+                        userData.errCode = 6;
+                        userData.errMessage = check.errMessage
+                    } else {
+                        userData.errCode = 5;
+                        userData.errMessage = `Email của bạn không tồn tại trong hệ thống. Vui lòng thử một email khác!`
+                    }
+
                 }
                 resolve(userData)
             }
@@ -296,12 +379,20 @@ let handleChangePassword = (data) => {
                 if (user) {
                     let check = await bcrypt.compareSync(data.oldPassword, user.password)
                     if (check) {
-                        user.password = await hashUserPassword(data.newPassword)
-                        await user.save();
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Thay đổi mật khẩu thành công!'
-                        })
+                        let isValidPw = validatePassword(data.newPassword);
+                        if (isValidPw === '') {
+                            user.password = await hashUserPassword(data.newPassword)
+                            await user.save();
+                            resolve({
+                                errCode: 0,
+                                errMessage: 'Thay đổi mật khẩu thành công!'
+                            })
+                        } else {
+                            resolve({
+                                errCode: 3,
+                                errMessage: isValidPw
+                            })
+                        }
                     } else {
                         resolve({
                             errCode: 2,
@@ -470,13 +561,21 @@ let handleResetPassword = (data) => {
                             errMessage: 'Mật khẩu mới không được trùng với mật khẩu cũ'
                         })
                     } else {
-                        user.password = await hashUserPassword(data.newPassword);
-                        user.userToken = "";
-                        await user.save();
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Ok'
-                        })
+                        let isValidPw = validatePassword(data.newPassword);
+                        if (isValidPw === "") {
+                            user.password = await hashUserPassword(data.newPassword);
+                            user.userToken = "";
+                            await user.save();
+                            resolve({
+                                errCode: 0,
+                                errMessage: 'Ok'
+                            })
+                        } else {
+                            resolve({
+                                errCode: 4,
+                                errMessage: isValidPw
+                            })
+                        }
                     }
                 } else {
                     resolve({

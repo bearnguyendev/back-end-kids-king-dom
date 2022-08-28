@@ -36,8 +36,21 @@ let deleteItemCart = async (req, res) => {
         })
     }
 }
+let deleteItemCartByUserId = async (req, res) => {
+    try {
+        let data = await cartService.deleteItemCartByUserId(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
 module.exports = {
     addItemCart: addItemCart,
     getAllCartByUserId: getAllCartByUserId,
-    deleteItemCart: deleteItemCart
+    deleteItemCart: deleteItemCart,
+    deleteItemCartByUserId: deleteItemCartByUserId
 }

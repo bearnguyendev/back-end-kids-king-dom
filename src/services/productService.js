@@ -55,16 +55,45 @@ let createNewProduct = (data) => {
                         productId: product.id,
                         image: data.image
                     })
-                    if (productImage) {
+                    data.arrAgeUseProduct = data.arrAgeUseProduct.map(item => {
+                        item.productId = product.id
+                        return item;
+                    })
+                    // get all existing data
+                    // let existing = await db.AgeUseProduct.findAll(
+                    //     {
+                    //         where: { productId: product.id },
+                    //         attributes: ['ageId', 'productId'],
+                    //         raw: true
+                    //     }
+                    // )
+                    //compare different
+                    // let toCreate = _.differenceWith(data.arrAgeUseProduct, existing, (a, b) => {
+                    //     return a.ageId === b.ageId;
+                    // });
+                    //create data
+                    let res = ''
+                    if (data.arrAgeUseProduct && data.arrAgeUseProduct.length > 0) {
+                        res = await db.AgeUseProduct.bulkCreate(data.arrAgeUseProduct);
+                    }
+                    if (productImage && res) {
                         resolve({
                             errCode: 0,
                             errMessage: 'Thêm mới sản phẩm thành công!'
                         })
                     } else {
-                        resolve({
-                            errCode: 2,
-                            errMessage: 'Thêm mới hình ảnh sản phẩm thất bại!'
-                        })
+                        if (!productImage) {
+                            resolve({
+                                errCode: 2,
+                                errMessage: 'Thêm mới hình ảnh sản phẩm thất bại!'
+                            })
+                        }
+                        if (!res) {
+                            resolve({
+                                errCode: 2,
+                                errMessage: 'Thêm mới độ tuổi sử dụng sản phẩm thất bại!'
+                            })
+                        }
                     }
                 } else {
                     resolve({
@@ -122,6 +151,8 @@ let updateProduct = (data) => {
                         productImage[0].image = data.image
                         await productImage[0].save()
                     }
+                    data.arrAgeUseProduct && data.arrAgeUseProduct.length > 0 &&
+                        await db.AgeUseProduct.bulkCreate(data.arrAgeUseProduct, { updateOnDuplicate: ['status'] });
                     await product.save()
                     resolve({
                         errCode: 0,
@@ -157,6 +188,11 @@ let getAllProduct = (data) => {
                     { model: db.Allcode, as: 'statusData', attributes: ['value', 'keyMap'] },
                     { model: db.Allcode, as: 'warrantyData', attributes: ['value', 'keyMap'] },
                     { model: db.ProductImage, as: 'productImageData' },
+                    {
+                        model: db.AgeUseProduct, as: 'productAgeData',
+                        include: { model: db.Allcode, as: 'AgeUseProductData', attributes: ['value'] }
+                    },
+                    { model: db.OrderProduct, as: 'OrderDetailData' }
                 ],
                 raw: false,
                 nest: true,
@@ -185,6 +221,9 @@ let getAllProduct = (data) => {
             }
             if (data.sortCreatedAt && data.sortCreatedAt === "true") {
                 conditionObject.order = [['createdAt', 'DESC']]
+            }
+            if (data.sortCount && data.sortCount === "true") {
+                conditionObject.order = [['count', 'DESC']]
             }
             let res = await db.Product.findAll(conditionObject)
             if (res && res.length > 0) {
@@ -346,44 +385,38 @@ let changeStatusProduct = (data) => {
         }
     })
 }
-let deleteProduct = (id) => {
+let deleteProduct = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!id) {
+            let product = await db.Product.findOne({
+                where: { id: data.id },
+            })
+            let isCheck = data && data.OrderDetailData && data.OrderDetailData.length > 0 ? 1 : 0
+            if (isCheck === 1) {
                 resolve({
-                    errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errCode: 3,
+                    errMessage: 'Sản phẩm đã có người mua chỉ có thể ẩn không thể xoá!'
                 })
             } else {
-                let product = await db.Product.findOne({
-                    where: { id: id },
-                    include: { model: db.OrderProduct, as: 'OrderDetailData', raw: false },
-                    raw: false
-                })
-                let isCheck = product && product.OrderDetailData && product.OrderDetailData.every(item => +item.OrderDetail.productId === +id)
-                if (isCheck === true) {
+                if (product) {
+                    await db.ProductImage.destroy({
+                        where: { productId: data.id }
+                    })
+                    await db.AgeUseProduct.destroy({
+                        where: { productId: data.id }
+                    })
+                    await db.Product.destroy({
+                        where: { id: data.id }
+                    });
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Sản phẩm đã có người mua không thể xoá!'
+                        errCode: 0,
+                        errMessage: 'Xoá sản phẩm thành công!'
                     })
                 } else {
-                    if (product) {
-                        await db.ProductImage.destroy({
-                            where: { productId: id }
-                        })
-                        await db.Product.destroy({
-                            where: { id: id }
-                        });
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Xoá sản phẩm thành công!'
-                        })
-                    } else {
-                        resolve({
-                            errCode: 2,
-                            errMessage: 'Không tìm thấy sản phẩm!'
-                        })
-                    }
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'Không tìm thấy sản phẩm!'
+                    })
                 }
             }
         } catch (error) {
@@ -408,6 +441,10 @@ let getDetailProductById = (id) => {
                         { model: db.Allcode, as: 'statusData', attributes: ['value'] },
                         { model: db.Allcode, as: 'warrantyData', attributes: ['value'] },
                         { model: db.ProductImage, as: 'productImageData' },
+                        {
+                            model: db.AgeUseProduct, as: 'productAgeData',
+                            include: { model: db.Allcode, as: 'AgeUseProductData', attributes: ['value'] }
+                        },
                     ],
                     raw: false,
                     nest: true
@@ -582,7 +619,7 @@ let getTopProductSold = (limit) => {
     return new Promise(async (resolve, reject) => {
         try {
             let res = await db.OrderProduct.findAll({
-                where: { statusId: 'S6' },
+                where: { statusId: 'S7' },
                 include: [
                     { model: db.OrderDetail, as: 'orderData', attributes: ['productId'] },
                 ],

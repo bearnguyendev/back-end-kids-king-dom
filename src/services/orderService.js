@@ -73,6 +73,12 @@ let getAllOrders = (statusId) => {
                     { model: db.Voucher, as: 'voucherData' },
                     { model: db.Allcode, as: 'statusOrderData' },
                     {
+                        model: db.Product, as: 'OrderDetailData', attributes: ['name', 'id', 'discountPrice'],
+                        include: {
+                            model: db.ProductImage, as: 'productImageData', attributes: ['id', 'image']
+                        }
+                    },
+                    {
                         model: db.Receiver, as: 'receiverOrderData',
                         include: [
                             {
@@ -84,12 +90,11 @@ let getAllOrders = (statusId) => {
                     },
                 ],
                 order: [['createdAt', 'DESC']],
-                raw: true,
+                raw: false,
                 nest: true
             }
             if (statusId && statusId !== 'ALL') objectFilter.where = { statusId: statusId }
             let res = await db.OrderProduct.findAll(objectFilter)
-
             resolve({
                 errCode: 0,
                 data: res
@@ -171,6 +176,20 @@ let updateStatusOrder = (data) => {
                 })
                 order.statusId = data.statusId
                 await order.save()
+                if (data.statusId === 'S7' && data.dataOrderUser.OrderDetailData && data.dataOrderUser.OrderDetailData.length > 0) {
+                    for (const iterator of data.dataOrderUser.OrderDetailData) {
+                        let product = await db.Product.findOne({
+                            where: { id: iterator.OrderDetail.productId },
+                            raw: false
+                        })
+                        if (product) {
+                            product.count++
+                            await product.save()
+                        }
+                    }
+                    order.orderDateSuccess = data.orderDateSuccess && data.orderDateSuccess
+                    await order.save()
+                }
                 // cong lai stock khi huy don
                 if (data.statusId === 'S8' && data.dataOrderUser.OrderDetailData && data.dataOrderUser.OrderDetailData.length > 0) {
                     for (const iterator of data.dataOrderUser.OrderDetailData) {
@@ -224,7 +243,7 @@ let getAllOrdersByUserId = (userId) => {
                     where: { userId: userId },
                     attributes: ['id', 'name'],
                     include: {
-                        model: db.OrderProduct, as: 'receiverOrderData', attributes: ["statusId", "totalPayment", 'id'],
+                        model: db.OrderProduct, as: 'receiverOrderData', order: [['updatedAt', 'DESC']], attributes: ["statusId", "totalPayment", 'id', "updatedAt"],
                         include: [
                             { model: db.TypeShip, as: 'typeShipData' },
                             // {
@@ -233,7 +252,7 @@ let getAllOrdersByUserId = (userId) => {
                             //         { model: db.TypeVoucher, as: 'typeVoucherOfVoucherData' },
                             //     ]
                             // },
-                            { model: db.Allcode, as: 'statusOrderData', attributes: ['value'], },
+                            { model: db.Allcode, as: 'statusOrderData', attributes: ['value', 'keyMap'], },
                             //{ model: db.OrderDetail, as: 'orderData' },
                             {
                                 model: db.Product, as: 'OrderDetailData', attributes: ['name', 'discountPrice', 'id', 'originalPrice', 'stock'],
@@ -270,6 +289,7 @@ let getAllOrdersByUserId = (userId) => {
         }
     })
 }
+
 module.exports = {
     createNewOrder: createNewOrder,
     getAllOrders: getAllOrders,

@@ -156,8 +156,39 @@ let deleteItemCart = (data) => {
         }
     })
 }
+let deleteItemCartByUserId = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.userId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Thiếu các thông số bắt buộc!'
+                })
+            } else {
+                let res = await db.Cart.findAll({ where: { userId: data.userId, statusId: 0 } })
+                if (res) {
+                    await db.Cart.destroy({
+                        where: { userId: data.userId }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: `Xoá giỏ hàng thành công!`
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Không tìm thấy sản phẩm trong giỏ hàng!`
+                    })
+                }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     addItemCart: addItemCart,
     getAllCartByUserId: getAllCartByUserId,
-    deleteItemCart: deleteItemCart
+    deleteItemCart: deleteItemCart,
+    deleteItemCartByUserId: deleteItemCartByUserId
 }

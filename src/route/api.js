@@ -96,6 +96,7 @@ let initApiRoutes = (app) => {
     router.post('/add-cart', cartController.addItemCart);
     router.get('/get-all-cart-by-user-id', cartController.getAllCartByUserId);
     router.delete('/delete-item-cart', cartController.deleteItemCart);
+    router.delete('/delete-item-cart-by-user-id', cartController.deleteItemCartByUserId);
 
     router.post('/create-new-receiver', receiverController.createNewReceiver);
     router.get('/get-all-receiver-by-user-id', receiverController.getAllReceiverByUserId);

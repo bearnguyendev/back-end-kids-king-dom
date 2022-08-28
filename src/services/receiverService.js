@@ -1,4 +1,15 @@
 import db from "../models/index";
+let validatePhoneNumber = (phoneNumber) => {
+    const regExp = /^[0-9\b]+$/;
+    const check = regExp.test(phoneNumber)
+    let errMessage = "";
+    if (!check) {
+        errMessage = "Vui lòng nhập số điện thoại là số"
+    } else {
+        errMessage = "";
+    }
+    return errMessage;
+}
 let createNewReceiver = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -8,22 +19,30 @@ let createNewReceiver = (data) => {
                     errMessage: 'Thiếu các thông số bắt buộc!',
                 })
             } else {
-                let res = await db.Receiver.create({
-                    userId: data.userId,
-                    name: data.name,
-                    address: data.address,
-                    phoneNumber: data.phoneNumber,
-                    status: data.status ? data.status : 0
-                })
-                if (!res) {
-                    resolve({
-                        errCode: 2,
-                        errMessage: 'Tạo mới địa chỉ nhận hàng thất bại!'
+                let isValidPhoneNumber = validatePhoneNumber(data.phoneNumber)
+                if (isValidPhoneNumber === "") {
+                    let res = await db.Receiver.create({
+                        userId: data.userId,
+                        name: data.name,
+                        address: data.address,
+                        phoneNumber: data.phoneNumber,
+                        status: data.status ? data.status : 0
                     })
+                    if (!res) {
+                        resolve({
+                            errCode: 2,
+                            errMessage: 'Tạo mới địa chỉ nhận hàng thất bại!'
+                        })
+                    } else {
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Tạo mới địa chỉ nhận hàng thành công!'
+                        })
+                    }
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: 'Tạo mới địa chỉ nhận hàng thành công!'
+                        errCode: 3,
+                        errMessage: isValidPhoneNumber
                     })
                 }
             }
@@ -114,15 +133,23 @@ let editReceiver = (data) => {
                     raw: false
                 })
                 if (receiver) {
-                    receiver.name = data.name
-                    receiver.phoneNumber = data.phoneNumber
-                    receiver.address = data.address
-                    receiver.status = data.status ? data.status : 0
-                    await receiver.save()
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Chỉnh sửa địa chỉ nhận hàng thành công!'
-                    })
+                    let isValidPhoneNumber = validatePhoneNumber(data.phoneNumber)
+                    if (isValidPhoneNumber === "") {
+                        receiver.name = data.name
+                        receiver.phoneNumber = data.phoneNumber
+                        receiver.address = data.address
+                        receiver.status = data.status ? data.status : 0
+                        await receiver.save()
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Chỉnh sửa địa chỉ nhận hàng thành công!'
+                        })
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: isValidPhoneNumber
+                        })
+                    }
                 } else {
                     resolve({
                         errCode: 2,

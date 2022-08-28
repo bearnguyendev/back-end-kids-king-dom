@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             Product.belongsToMany(models.User, { through: { model: models.Cart, unique: false }, foreignKey: 'productId', as: 'ProductUserCartData' });
             Product.belongsToMany(models.OrderProduct, { through: { model: models.OrderDetail, unique: false }, foreignKey: 'productId', as: 'OrderDetailData' });
             Product.hasMany(models.Comment, { foreignKey: "productId", as: "commentProductData" })
+            Product.hasMany(models.AgeUseProduct, { foreignKey: 'productId', as: 'productAgeData' })
         }
     };
     Product.init({
@@ -29,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         height: DataTypes.STRING,
         weight: DataTypes.STRING,
         stock: DataTypes.INTEGER,
+        count: DataTypes.INTEGER,
         nameDetail: DataTypes.STRING,
         originalPrice: DataTypes.BIGINT,
         percentDiscount: DataTypes.INTEGER,
