@@ -2,7 +2,7 @@ import _ from "lodash";
 import db from "../models/index";
 const { Op } = require("sequelize");
 let checkRequiredFields = (inputData) => {
-    let arrFields = ['name', 'origin', 'material', 'categoryId', 'brandId', 'warrantyId', 'nameDetail', 'long', 'width', 'height', 'weight', 'stock', 'originalPrice', 'percentDiscount', 'desMarkdown', 'desHTML']
+    let arrFields = ['name', 'origin', 'material', 'categoryId', 'brandId', 'warrantyId', 'nameDetail', 'long', 'width', 'height', 'weight', 'originalPrice', 'percentDiscount', 'desMarkdown', 'desHTML']
     let isValid = true;
     let element = '';
     for (let i = 0; i < arrFields.length; i++) {
@@ -42,7 +42,7 @@ let createNewProduct = (data) => {
                     width: data.width,
                     height: data.height,
                     weight: data.weight,
-                    stock: data.stock,
+                    stock: 0,
                     nameDetail: data.nameDetail,
                     originalPrice: data.originalPrice,
                     percentDiscount: data.percentDiscount,
@@ -133,7 +133,7 @@ let updateProduct = (data) => {
                     product.width = data.width;
                     product.height = data.height;
                     product.weight = data.weight;
-                    product.stock = data.stock;
+                    //product.stock = data.stock;
                     product.nameDetail = data.nameDetail;
                     product.originalPrice = data.originalPrice;
                     product.percentDiscount = data.percentDiscount;

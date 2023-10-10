@@ -11,6 +11,7 @@ import orderController from "../controllers/orderController";
 import cartController from "../controllers/cartController";
 import receiverController from "../controllers/receiverController";
 import commentController from "../controllers/commentController";
+import importProductController from "../controllers/importProductController";
 
 let router = express.Router();
 let initApiRoutes = (app) => {
@@ -109,6 +110,15 @@ let initApiRoutes = (app) => {
     router.post('/reply-comment', commentController.ReplyComment)
     router.get('/get-all-comment-by-product-id', commentController.getAllCommentByProductId)
     router.delete('/delete-comment', commentController.deleteComment)
+
+    router.post('/create-new-import-product', importProductController.addImport);
+    router.get('/get-all-import-product', importProductController.getAllImport);
+    router.put('/update-import-product', importProductController.updateImport);
+    router.delete('/delete-import-product', importProductController.deleteImport);
+
+    router.post('/payment-momo', orderController.paymentMomoOrder)
+    router.post('/payment-paypal', orderController.paymentPayPalOrder)
+    router.post('/payment-paypal-success', orderController.paymentPayPalSuccess)
 
     return app.use("/api", router);
 }

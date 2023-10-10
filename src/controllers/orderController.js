@@ -60,10 +60,49 @@ let getAllOrdersByUserId = async (req, res) => {
         })
     }
 }
+let paymentMomoOrder = async (req, res) => {
+    try {
+        let data = await orderService.paymentMomoOrder(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
+let paymentPayPalOrder = async (req, res) => {
+    try {
+        let data = await orderService.paymentPayPalOrder(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
+let paymentPayPalSuccess = async (req, res) => {
+    try {
+        let data = await orderService.paymentPayPalSuccess(req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            errCode: -1,
+            errMessage: 'Lỗi từ máy chủ!'
+        })
+    }
+}
 module.exports = {
     createNewOrder: createNewOrder,
     getAllOrders: getAllOrders,
     getDetailOrderById: getDetailOrderById,
     updateStatusOrder: updateStatusOrder,
     getAllOrdersByUserId: getAllOrdersByUserId,
+    paymentMomoOrder: paymentMomoOrder,
+    paymentPayPalOrder: paymentPayPalOrder,
+    paymentPayPalSuccess: paymentPayPalSuccess
 }

@@ -146,32 +146,41 @@ let deleteVoucher = (data) => {
                     errMessage: 'Thiếu các thông số bắt buộc!'
                 })
             } else {
-                let voucher = await db.Voucher.findOne({
-                    where: { id: data.id }
+                let checkVoucherUsed = await db.VoucherUsed.findOne({
+                    where: { voucherId: data.id }
                 })
-                if (voucher) {
-                    let res = await db.Voucher.destroy({
-                        where: { id: data.id }
-                    })
-                    if (!res) {
-                        resolve({
-                            errCode: 2,
-                            errMessage: 'Xoá mã giảm giá thất bại!'
-                        })
-                    } else {
-                        resolve({
-                            errCode: 0,
-                            errMessage: 'Xoá mã giảm giá thành công!'
-                        })
-                    }
-                } else {
+                if (checkVoucherUsed) {
                     resolve({
                         errCode: 3,
-                        errMessage: 'Không tìm thấy mã giảm giá!'
+                        errMessage: 'Không thể xoá mã giảm giá đã được sử dụng!'
                     })
+                } else {
+                    let voucher = await db.Voucher.findOne({
+                        where: { id: data.id }
+                    })
+                    if (voucher) {
+                        let res = await db.Voucher.destroy({
+                            where: { id: data.id }
+                        })
+                        if (!res) {
+                            resolve({
+                                errCode: 2,
+                                errMessage: 'Xoá mã giảm giá thất bại!'
+                            })
+                        } else {
+                            resolve({
+                                errCode: 0,
+                                errMessage: 'Xoá mã giảm giá thành công!'
+                            })
+                        }
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: 'Không tìm thấy mã giảm giá!'
+                        })
+                    }
                 }
             }
-
         } catch (error) {
             reject(error)
         }

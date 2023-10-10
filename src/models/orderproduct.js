@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         voucherId: DataTypes.STRING,
         note: DataTypes.STRING,
         totalPayment: DataTypes.BIGINT,
+        isPaymentOnl: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'OrderProduct',

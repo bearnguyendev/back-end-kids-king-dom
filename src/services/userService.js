@@ -72,11 +72,11 @@ let validatePassword = (passwordInputValue) => {
     return errMessage;
 };
 let validatePhoneNumber = (phoneNumber) => {
-    const regExp = /^[0-9\b]+$/;
+    const regExp = /((09|03|07|08|05)+([0-9]{8})\b)/g;
     const check = regExp.test(phoneNumber)
     let errMessage = "";
     if (!check) {
-        errMessage = "Vui lòng nhập số điện thoại là số"
+        errMessage = "Số điện thoại của bạn không đúng định dạng!"
     } else {
         errMessage = "";
     }
