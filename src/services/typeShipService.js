@@ -1,23 +1,35 @@
 import db from "../models/index";
 require('dotenv').config();
-
+import { Message } from "../config/message";
 let createNewTypeShip = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.price || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
-                await db.TypeShip.create({
-                    type: data.type,
-                    price: data.price,
+                const [res, created] = await db.TypeShip.findOrCreate({
+                    where: {
+                        type: data.type
+                    },
+                    defaults: {
+                        type: data.type,
+                        price: data.price,
+                    }
                 })
-                resolve({
-                    errCode: 0,
-                    errMessage: 'Tạo mới phương thức vận chuyển thành công!'
-                })
+                if (!created) {
+                    resolve({
+                        errCode: 2,
+                        errMessage: `Phương thức vận chuyển ${data.type} đã tồn tại!`
+                    })
+                } else {
+                    resolve({
+                        errCode: 0,
+                        errMessage: Message.TypeShip.add
+                    })
+                }
             }
         } catch (error) {
             reject(error)
@@ -30,7 +42,7 @@ let getDetailTypeShipById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let data = await db.TypeShip.findOne({
@@ -66,7 +78,7 @@ let getListTypeShip = (data) => {
             if (!data.limit) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.TypeShip.findAll({
@@ -90,7 +102,7 @@ let updateTypeShip = (data) => {
             if (!data.id || !data.price || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let typeShip = await db.TypeShip.findOne({
@@ -103,7 +115,12 @@ let updateTypeShip = (data) => {
                     await typeShip.save()
                     resolve({
                         errCode: 0,
-                        errMessage: 'Cập nhật thông tin phương thức vận chuyển thành công!'
+                        errMessage: Message.TypeShip.up
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: Message.TypeShip.errCode2
                     })
                 }
             }
@@ -119,19 +136,34 @@ let deleteTypeShip = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let typeShip = await db.TypeShip.findOne({
                     where: { id: data.id }
                 })
                 if (typeShip) {
-                    await db.TypeShip.destroy({
-                        where: { id: data.id }
+                    let typeShipUsed = db.OrderProduct.findOne({
+                        where: { typeShipId: data.id }
                     })
+                    if (typeShipUsed) {
+                        resolve({
+                            errCode: 3,
+                            errMessage: Message.TypeShip.used
+                        })
+                    } else {
+                        await db.TypeShip.destroy({
+                            where: { id: data.id }
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: Message.TypeShip.dlt
+                        })
+                    }
+                } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: 'Xoá phương thức vận chuyển thành công!'
+                        errCode: 2,
+                        errMessage: Message.TypeShip.errCode2
                     })
                 }
             }

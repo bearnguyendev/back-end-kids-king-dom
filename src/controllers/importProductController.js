@@ -1,5 +1,5 @@
 import importProductService from "../services/importProductService"
-
+import { Message } from "../config/message";
 let addImport = async (req, res) => {
     try {
         let data = await importProductService.addImport(req.body);
@@ -8,7 +8,7 @@ let addImport = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -20,7 +20,7 @@ let updateImport = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -32,7 +32,7 @@ let getAllImport = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -44,7 +44,7 @@ let deleteImport = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

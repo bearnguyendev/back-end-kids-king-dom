@@ -3,6 +3,10 @@ import bodyParser from "body-parser";
 import viewEngine from "./config/viewEngine";
 import initApiRoutes from "./route/api";
 import connectDB from "./config/connectDB";
+import { configLoginWithGoogle } from "./controllers/social/GoogleController"
+const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 //import cors from "cors";
 require("dotenv").config();
 
@@ -38,7 +42,8 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 viewEngine(app);
-
+app.use(passport.initialize());
+configLoginWithGoogle(app);
 initApiRoutes(app);
 
 connectDB();

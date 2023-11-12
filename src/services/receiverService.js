@@ -1,10 +1,11 @@
 import db from "../models/index";
+import { Message } from "../config/message";
 let validatePhoneNumber = (phoneNumber) => {
-    const regExp = /^[0-9\b]+$/;
+    const regExp = /((09|03|07|08|05)+([0-9]{8})\b)/g;
     const check = regExp.test(phoneNumber)
     let errMessage = "";
     if (!check) {
-        errMessage = "Vui lòng nhập số điện thoại là số"
+        errMessage = Message.failPhoneNumber
     } else {
         errMessage = "";
     }
@@ -16,7 +17,7 @@ let createNewReceiver = (data) => {
             if (!data.userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let isValidPhoneNumber = validatePhoneNumber(data.phoneNumber)
@@ -31,12 +32,12 @@ let createNewReceiver = (data) => {
                     if (!res) {
                         resolve({
                             errCode: 2,
-                            errMessage: 'Tạo mới địa chỉ nhận hàng thất bại!'
+                            errMessage: Message.Receiver.addFail
                         })
                     } else {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Tạo mới địa chỉ nhận hàng thành công!'
+                            errMessage: Message.Receiver.add
                         })
                     }
                 } else {
@@ -57,7 +58,7 @@ let getAllReceiverByUserId = (userId) => {
             if (!userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let res = await db.Receiver.findAll({
@@ -66,7 +67,7 @@ let getAllReceiverByUserId = (userId) => {
                 if (!res) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy địa chỉ nhận hàng!'
+                        errMessage: Message.Receiver.errCode2
                     })
                 } else {
                     resolve({
@@ -86,7 +87,7 @@ let deleteReceiver = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let receiver = await db.Receiver.findOne({
@@ -95,19 +96,26 @@ let deleteReceiver = (data) => {
                     }
                 })
                 if (receiver) {
-                    await db.Receiver.destroy({
+                    let res = await db.Receiver.destroy({
                         where: {
                             id: data.id
                         }
                     })
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Xoá địa chỉ nhận hàng thành công!'
-                    })
+                    if (res) {
+                        resolve({
+                            errCode: 0,
+                            errMessage: Message.Receiver.delete
+                        })
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: Message.Receiver.deleteFail
+                        })
+                    }
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Địa chỉ nhận hàng không tìm thấy!'
+                        errMessage: Message.Receiver.errCode2
                     })
                 }
 
@@ -123,7 +131,7 @@ let editReceiver = (data) => {
             if (!data.id || !data.name || !data.address || !data.phoneNumber) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let receiver = await db.Receiver.findOne({
@@ -142,7 +150,7 @@ let editReceiver = (data) => {
                         await receiver.save()
                         resolve({
                             errCode: 0,
-                            errMessage: 'Chỉnh sửa địa chỉ nhận hàng thành công!'
+                            errMessage: Message.Receiver.up
                         })
                     } else {
                         resolve({
@@ -153,7 +161,7 @@ let editReceiver = (data) => {
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Địa chỉ nhận hàng không tồn tại'
+                        errMessage: Message.Receiver.errCode2
                     })
                 }
             }
@@ -168,7 +176,7 @@ let getDetailReceiverById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let res = await db.Receiver.findOne({
@@ -177,7 +185,7 @@ let getDetailReceiverById = (id) => {
                 if (!res) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy địa chỉ nhận hàng!'
+                        errMessage: Message.Receiver.errCode2
                     })
                 } else {
                     resolve({
@@ -197,7 +205,7 @@ let handleChangeStatusReceiver = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                 })
             } else {
                 let receiver = await db.Receiver.findAll({
@@ -218,12 +226,12 @@ let handleChangeStatusReceiver = (data) => {
                     await res.save()
                     resolve({
                         errCode: 0,
-                        errMessage: 'Đặt địa chỉ nhận hàng làm mặc định thành công!'
+                        errMessage: Message.Receiver.setDefault
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không có dữ liệu địa chỉ nhận hàng'
+                        errMessage: Message.Receiver.errCode2
                     })
                 }
             }

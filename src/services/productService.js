@@ -1,6 +1,7 @@
 import _ from "lodash";
 import db from "../models/index";
 const { Op } = require("sequelize");
+import { Message } from "../config/message";
 let checkRequiredFields = (inputData) => {
     let arrFields = ['name', 'origin', 'material', 'categoryId', 'brandId', 'warrantyId', 'nameDetail', 'long', 'width', 'height', 'weight', 'originalPrice', 'percentDiscount', 'desMarkdown', 'desHTML']
     let isValid = true;
@@ -79,26 +80,26 @@ let createNewProduct = (data) => {
                     if (productImage && res) {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Thêm mới sản phẩm thành công!'
+                            errMessage: Message.Product.addProduct
                         })
                     } else {
                         if (!productImage) {
                             resolve({
                                 errCode: 2,
-                                errMessage: 'Thêm mới hình ảnh sản phẩm thất bại!'
+                                errMessage: Message.Product.addImgFail
                             })
                         }
                         if (!res) {
                             resolve({
-                                errCode: 2,
-                                errMessage: 'Thêm mới độ tuổi sử dụng sản phẩm thất bại!'
+                                errCode: 4,
+                                errMessage: Message.Product.addAgeFail
                             })
                         }
                     }
                 } else {
                     resolve({
                         errCode: 3,
-                        errMessage: 'Thêm mới sản phẩm thất bại!'
+                        errMessage: Message.Product.addProductFail
                     })
                 }
             }
@@ -114,7 +115,7 @@ let updateProduct = (data) => {
             if (checkObj.isValid === false || !data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: checkObj.element ? `Thiếu thông số bắt buộc: ${checkObj.element}` : `Thiếu thông số bắt buộc: id`
+                    errMessage: checkObj.element ? `Thiếu thông số bắt buộc: ${checkObj.element}` : Message.Product.noId
                 })
             } else {
                 let product = await db.Product.findOne({
@@ -156,13 +157,13 @@ let updateProduct = (data) => {
                     await product.save()
                     resolve({
                         errCode: 0,
-                        errMessage: 'Cập nhật sản phẩm thành công!'
+                        errMessage: Message.Product.up
                     })
 
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy sản phẩm!'
+                        errMessage: Message.Product.errCode2
                     })
                 }
             }
@@ -177,7 +178,7 @@ let getAllProduct = (data) => {
             if (!data.statusId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                     res: []
                 });
             }
@@ -253,7 +254,7 @@ let getTopProductHomePage = (limit, typeSort) => {
             if (!limit || !typeSort) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                     data: []
                 });
             } else {
@@ -302,7 +303,7 @@ let searchProduct = (data) => {
             if (!data.valueSearch) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Chưa nhập tên phẩm cần tìm!'
+                    errMessage: Message.Product.noName
                 })
             } else {
                 let res = await db.Product.findAll({
@@ -349,7 +350,7 @@ let changeStatusProduct = (data) => {
             if (!data.id || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let product = await db.Product.findOne({
@@ -362,7 +363,7 @@ let changeStatusProduct = (data) => {
                         await product.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Ẩn sản phẩm thành công!'
+                            errMessage: Message.Product.hidden
                         })
                     }
                     if (data.type === 'PERMIT') {
@@ -370,13 +371,13 @@ let changeStatusProduct = (data) => {
                         await product.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Hiện sản phẩm thành công!'
+                            errMessage: Message.Product.show
                         })
                     }
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy sản phẩm!'
+                        errMessage: Message.Product.errCode2
                     })
                 }
             }
@@ -395,7 +396,7 @@ let deleteProduct = (data) => {
             if (isCheck === 1) {
                 resolve({
                     errCode: 3,
-                    errMessage: 'Sản phẩm đã có người mua chỉ có thể ẩn không thể xoá!'
+                    errMessage: Message.Product.bought
                 })
             } else {
                 if (product) {
@@ -410,12 +411,12 @@ let deleteProduct = (data) => {
                     });
                     resolve({
                         errCode: 0,
-                        errMessage: 'Xoá sản phẩm thành công!'
+                        errMessage: Message.Product.delete
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy sản phẩm!'
+                        errMessage: Message.Product.errCode2
                     })
                 }
             }
@@ -430,7 +431,7 @@ let getDetailProductById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Product.findOne({
@@ -475,7 +476,7 @@ let createNewProductImage = (data) => {
             if (!data.productId || !data.image) {
                 resolve({
                     errCode: 1,
-                    errMessage: `Thiếu các thông số bắt buộc`
+                    errMessage: Message.errCode1
                 })
             } else {
                 let product = await db.Product.findOne({
@@ -490,18 +491,18 @@ let createNewProductImage = (data) => {
                     if (productImage) {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Thêm mới hình ảnh thành công!'
+                            errMessage: Message.Product.addImg
                         })
                     } else {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Thêm mới hình ảnh sản phẩm thất bại!'
+                            errCode: 3,
+                            errMessage: Message.Product.addImgFail
                         })
                     }
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy sản phẩm để thêm hình ảnh!'
+                        errCode: 2,
+                        errMessage: Message.Product.errCode2
                     })
                 }
             }
@@ -516,7 +517,7 @@ let updateProductImage = (data) => {
             if (!data.id || !data.image || !data.productId) {
                 resolve({
                     errCode: 1,
-                    errMessage: `Thiếu các thông số bắt buộc`
+                    errMessage: Message.errCode1
                 })
             } else {
                 let product = await db.Product.findOne({
@@ -534,20 +535,20 @@ let updateProductImage = (data) => {
                     if (res) {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Cập nhật hình ảnh sản phẩm thành công!'
+                            errMessage: Message.Product.upImg
                         })
                     } else {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Không tìm thấy hình ảnh sản phẩm!'
+                            errCode: 3,
+                            errMessage: Message.Product.noImg
                         })
                     }
 
 
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy sản phẩm!'
+                        errCode: 2,
+                        errMessage: Message.Product.errCode2
                     })
                 }
             }
@@ -562,7 +563,7 @@ let getAllProductImageFromProduct = (productId) => {
             if (!productId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                     data: []
                 });
             }
@@ -583,7 +584,7 @@ let getAllProductImageFromProduct = (productId) => {
             else {
                 resolve({
                     errCode: 2,
-                    errMessage: 'Lấy dữ liệu hình ảnh thất bại!',
+                    errMessage: Message.Product.getImgFail,
                     data: []
                 });
             }
@@ -598,16 +599,23 @@ let deleteProductImage = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
-                await db.ProductImage.destroy({
+                let res = await db.ProductImage.destroy({
                     where: { id: id }
                 });
-                resolve({
-                    errCode: 0,
-                    errMessage: 'Xoá hình ảnh thành công!'
-                })
+                if (res) {
+                    resolve({
+                        errCode: 0,
+                        errMessage: Message.Product.dltImg
+                    })
+                } else {
+                    resolve({
+                        errCode: 3,
+                        errMessage: Message.Product.dltImgFail
+                    })
+                }
             }
         } catch (error) {
             reject(error)
@@ -627,10 +635,18 @@ let getTopProductSold = (limit) => {
                 raw: false,
                 nest: true
             })
-            resolve({
-                errCode: 0,
-                data: res
-            })
+            if (res) {
+                resolve({
+                    errCode: 0,
+                    data: res
+                })
+            } else {
+                resolve({
+                    errCode: 3,
+                    errMessage: Message.Product.getDataFail
+                })
+            }
+
         } catch (error) {
             reject(error)
         }

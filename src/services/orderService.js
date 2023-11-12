@@ -4,13 +4,14 @@ require('dotenv').config();
 import { v4 as uuidv4 } from 'uuid';
 import paypal from 'paypal-rest-sdk'
 import axios from 'axios';
+import { Message } from "../config/message";
 const vnpay = require('vn-payments');
 import initiatePayment from "./MomoPayMent"
 //const vnpay = require('vnpay');
 paypal.configure({
-    'mode': 'sandbox', //sandbox or live
-    'client_id': 'Aae08JhLTsu3TfUXSNpTgccNk5y89iXoKT3la1uNX5BxRrEeMWOIyg3wnDYeoeX8I5TJZl27bd0U6eKS',
-    'client_secret': 'EO7WultyeOU6vXSyVgiUAUDHP2WF7GghDkqb_T5PQkuootZ3OItqbADgdCczftVoFtZRk98qGCUmSiQY'
+    'mode': process.env.PAYPAL_MODE, //sandbox or live
+    'client_id': process.env.PAYPAL_CLIENT_ID,
+    'client_secret': process.env.PAYPAL_CLIENT_SECRET
 });
 let createNewOrder = (data) => {
     return new Promise(async (resolve, reject) => {
@@ -18,7 +19,7 @@ let createNewOrder = (data) => {
             if (!data.receiverId || !data.typeShipId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let product = await db.OrderProduct.create({
@@ -69,7 +70,7 @@ let createNewOrder = (data) => {
                 }
                 resolve({
                     errCode: 0,
-                    errMessage: 'Đặt hàng thành công!'
+                    errMessage: Message.Order.success
                 })
             }
         } catch (error) {
@@ -123,7 +124,7 @@ let getDetailOrderById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let order = await db.OrderProduct.findOne({
@@ -180,7 +181,7 @@ let updateStatusOrder = (data) => {
             if (!data.id || !data.statusId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let order = await db.OrderProduct.findOne({
@@ -230,12 +231,12 @@ let updateStatusOrder = (data) => {
                     // }
                     resolve({
                         errCode: 0,
-                        errMessage: 'Huỷ đơn hàng thành công!'
+                        errMessage: Message.Order.cancel
                     })
                 }
                 resolve({
                     errCode: 0,
-                    errMessage: 'ok'
+                    errMessage: Message.Order.ok
                 })
             }
         } catch (error) {
@@ -249,7 +250,7 @@ let getAllOrdersByUserId = (userId) => {
             if (!userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let receiver = await db.Receiver.findAll({
@@ -308,7 +309,7 @@ let paymentVNPayOrder = (data) => {
             if (!data.id || !data.statusId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 const orderInfo = req.body.orderInfo;
@@ -429,49 +430,25 @@ let paymentVNPayOrder = (data) => {
 let paymentMomoOrder = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const res = await initiatePayment(data)
-            resolve({
-                res
-            })
+            if (!data.orderId || !data.amount || !data.orderInfo) {
+                resolve({
+                    errCode: 1,
+                    errMessage: Message.errCode1
+                })
+            } else {
+                const res = await initiatePayment(data)
+                if (res) {
+                    resolve({
+                        res
+                    })
+                } else {
+                    resolve({
+                        errCode: 3,
+                        errMessage: Message.Order.paymentFail
+                    })
+                }
 
-            ///momo
-            // const amount = data.totalPayment
-            // const orderInfo = data.items
-            // const hostname = 'https://test-payment.momo.vn'; // Địa chỉ hostname của Momo Sandbox
-            // const partnerCode = 'MOMO'; // Partner code của bạn
-            // const accessKey = 'F8BBA842ECF85'; // Access key của bạn
-            // const secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz'; // Secret key của bạn
-            // const returnUrl = `${process.env.URL_REACT}/payment/success`; // URL để Momo redirect sau khi thanh toán thành công
-            // const notifyUrl = `${process.env.URL_REACT}/payment/notify`; // URL để Momo gửi thông báo thanh toán
-            // const paymentRequest = momo.createPaymentRequest(hostname, returnUrl, notifyUrl, amount, orderInfo);
-            // const response = await momo.sendPaymentRequest(paymentRequest, partnerCode, accessKey, secretKey);
-            // resolve({
-            //     response
-            // })
-            // const res = await initiatePayment(data)
-            // resolve({
-            //     res
-            // })
-            // const params = {
-            //     accessKey: 'F8BBA842ECF85',
-            //     secretKey: 'K951B6PE1waDMi640xX08PD3vg6EkVlz',
-            //     orderInfo: data.orderInfo,
-            //     partnerCode: 'MOMO',
-            //     redirectUrl: `${process.env.URL_REACT}/payment-success`,
-            //     //ipnUrl: 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b',
-            //     requestType: 'captureMoMoWallet',
-            //     amount: data.amount + '',
-            //     orderId: data.orderId + new Date().getTime(),
-            //     requestId: data.orderId,
-            //     autoCapture: true,
-            //     lang: 'vi',
-            // }
-
-            // const res = await axios.post('https://test-payment.momo.vn/gw_payment/transactionProcessor', params)
-            // console.log("check res: ", res);
-            // resolve({
-            //     data: res.data
-            // })
+            }
         } catch (error) {
             reject(error)
         }
@@ -484,7 +461,7 @@ let paymentPayPalOrder = (data) => {
             if (!data) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 console.log(data.totalPayment);
@@ -519,7 +496,7 @@ let paymentPayPalOrder = (data) => {
                         console.log("Create Payment Response");
                         resolve({
                             errCode: 0,
-                            errMessage: 'ok',
+                            errMessage: Message.Order.ok,
                             // link: payment.links[1].href
                             link: payment.links.find((link) => link.rel === 'approval_url').href
                         })
@@ -539,7 +516,7 @@ let paymentPayPalSuccess = (data) => {
             if (!data.PayerID || !data.paymentId || !data.token) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 var execute_payment_json = {
@@ -565,7 +542,14 @@ let paymentPayPalSuccess = (data) => {
                     } else {
                         console.log("Get Payment Response");
                         let res = await createNewOrder(data.orderData)
-                        resolve(res)
+                        if (res) {
+                            resolve(res)
+                        } else {
+                            resolve({
+                                errCode: 3,
+                                errMessage: Message.Order.paymentFail
+                            })
+                        }
                         // let product = await db.OrderProduct.create({
                         //     orderDate: data.orderDate,
                         //     receiverId: data.receiverId,
@@ -618,25 +602,6 @@ let paymentPayPalSuccess = (data) => {
                         // })
                     }
                 });
-
-
-                //     const { partnerRefId, momoTransId } = req.body;
-
-                //     // Kiểm tra trạng thái thanh toán
-                //     const paymentStatusRequest = momo.createPaymentStatusRequest(hostname, partnerRefId, momoTransId);
-                //     const response = await momo.sendPaymentStatusRequest(paymentStatusRequest, partnerCode, accessKey, secretKey);
-
-                //     // Trả về response cho client
-                //     res.json(response);
-                //   } catch (error) {
-                //     console.error('Error:', error.message);
-                //     res.status(500).json({ error: 'Internal server error' });
-                //   }
-
-
-
-
-
             }
         } catch (error) {
             reject(error)

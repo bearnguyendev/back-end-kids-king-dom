@@ -1,5 +1,5 @@
 import typeVoucherService from '../services/typeVoucherService';
-
+import { Message } from "../config/message";
 let createNewTypeVoucher = async (req, res) => {
     try {
         let data = await typeVoucherService.createNewTypeVoucher(req.body);
@@ -8,7 +8,7 @@ let createNewTypeVoucher = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -20,7 +20,7 @@ let getDetailTypeVoucherById = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -32,7 +32,7 @@ let getAllTypeVoucher = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -44,7 +44,7 @@ let updateTypeVoucher = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -56,7 +56,7 @@ let deleteTypeVoucher = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -68,7 +68,7 @@ let getSelectTypeVoucher = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

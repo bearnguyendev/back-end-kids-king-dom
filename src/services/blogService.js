@@ -1,13 +1,14 @@
 import db from "../models/index";
 require('dotenv').config();
 const { Op } = require("sequelize");
+import { Message } from "../config/message";
 let createNewBlog = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.title || !data.contentMarkdown || !data.contentHTML || !data.image || !data.subjectId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Blog.create({
@@ -22,12 +23,12 @@ let createNewBlog = (data) => {
                 if (!res) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Thêm mới bài đăng thất bại!'
+                        errMessage: Message.Blog.addFail
                     })
                 } else {
                     resolve({
                         errCode: 0,
-                        errMessage: 'Thêm mới bài đăng thành công!'
+                        errMessage: Message.Blog.add
                     })
                 }
             }
@@ -42,7 +43,7 @@ let getDetailBlogById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Blog.findOne({
@@ -73,7 +74,7 @@ let getAllBlog = (data) => {
             if (!data.statusId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let conditionObject = {
@@ -106,7 +107,7 @@ let getListBlog = (limit) => {
             if (!limit) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                     data: []
                 });
             } else {
@@ -141,7 +142,7 @@ let updateBlog = (data) => {
             if (!data.id || !data.title || !data.contentMarkdown || !data.contentHTML || !data.image || !data.subjectId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let blog = await db.Blog.findOne({
@@ -159,19 +160,19 @@ let updateBlog = (data) => {
                     let res = await blog.save();
                     if (!res) {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Chỉnh sửa bài đăng thất bại!'
+                            errCode: 3,
+                            errMessage: Message.Blog.addFail
                         })
                     } else {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Chỉnh sửa bài đăng thành công!'
+                            errMessage: Message.Blog.up
                         })
                     }
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy bài đăng!'
+                        errCode: 2,
+                        errMessage: Message.Blog.errCode2
                     })
                 }
             }
@@ -186,7 +187,7 @@ let deleteBlog = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let blog = await db.Blog.findOne({
@@ -198,19 +199,19 @@ let deleteBlog = (data) => {
                     })
                     if (!res) {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Xoá bài đăng thất bại!'
+                            errCode: 3,
+                            errMessage: Message.Blog.deleteFail
                         })
                     } else {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Xoá bài đăng thành công!'
+                            errMessage: Message.Blog.delete
                         })
                     }
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy bài đăng!'
+                        errCode: 2,
+                        errMessage: Message.Blog.errCode2
                     })
                 }
             }
@@ -225,7 +226,7 @@ let changeStatusBlog = (data) => {
             if (!data.id || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let blog = await db.Blog.findOne({
@@ -238,7 +239,7 @@ let changeStatusBlog = (data) => {
                         await blog.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Ẩn bài đăng thành công!'
+                            errMessage: Message.Blog.hidden
                         })
                     }
                     if (data.type === 'PERMIT') {
@@ -246,13 +247,13 @@ let changeStatusBlog = (data) => {
                         await blog.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Hiện bài đăng thành công!'
+                            errMessage: Message.Blog.show
                         })
                     }
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy bài đăng!'
+                        errMessage: Message.Blog.errCode2
                     })
                 }
             }

@@ -1,4 +1,5 @@
 import express from "express";
+import passport from 'passport';
 import userController from "../controllers/userController";
 import allCodeController from "../controllers/allCodeController";
 import productController from '../controllers/productController';
@@ -34,6 +35,7 @@ let initApiRoutes = (app) => {
     router.delete('/delete-all-code', allCodeController.deleteAllCode); //id
     router.get('/get-list-all-code', allCodeController.getListAllCode); //type,limit
     router.get('/get-detail-all-code-by-id', allCodeController.getDetailAllCodeById); //id
+    router.put('/change-status-all-code', allCodeController.changeStatusAllcode);
 
     router.post('/create-new-product', productController.createNewProduct);
     router.put('/update-product', productController.updateProduct);
@@ -119,6 +121,7 @@ let initApiRoutes = (app) => {
     router.post('/payment-momo', orderController.paymentMomoOrder)
     router.post('/payment-paypal', orderController.paymentPayPalOrder)
     router.post('/payment-paypal-success', orderController.paymentPayPalSuccess)
+
 
     return app.use("/api", router);
 }

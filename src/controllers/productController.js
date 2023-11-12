@@ -1,4 +1,5 @@
 import productService from '../services/productService';
+import { Message } from "../config/message";
 let createNewProduct = async (req, res) => {
     try {
         let data = await productService.createNewProduct(req.body);
@@ -7,7 +8,7 @@ let createNewProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -19,7 +20,7 @@ let updateProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -31,7 +32,7 @@ let getAllProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -45,7 +46,7 @@ let getTopProductHomePage = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -57,7 +58,7 @@ let deleteProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -69,7 +70,7 @@ let getDetailProductById = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -81,7 +82,7 @@ let changeStatusProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -94,7 +95,7 @@ let createNewProductImage = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -106,7 +107,7 @@ let updateProductImage = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -118,7 +119,7 @@ let getAllProductImageFromProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -130,7 +131,7 @@ let deleteProductImage = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -142,7 +143,7 @@ let searchProduct = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -156,7 +157,7 @@ let getTopProductSold = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

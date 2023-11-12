@@ -1,11 +1,12 @@
 import db from "../models/index";
+import { Message } from "../config/message";
 let createNewTypeVoucher = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.type || !data.value || !data.minValue) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.TypeVoucher.create({
@@ -17,12 +18,12 @@ let createNewTypeVoucher = (data) => {
                 if (!res) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Thêm mới loại giảm giá thất bại!'
+                        errMessage: Message.TypeVoucher.addFail
                     })
                 } else {
                     resolve({
                         errCode: 0,
-                        errMessage: 'Thêm mới loại giảm giá thành công!'
+                        errMessage: Message.TypeVoucher.add
                     })
                 }
             }
@@ -37,7 +38,7 @@ let getDetailTypeVoucherById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.TypeVoucher.findOne({
@@ -84,7 +85,7 @@ let updateTypeVoucher = (data) => {
             if (!data.id || !data.type || !data.value || !data.minValue) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let typeVoucher = await db.TypeVoucher.findOne({
@@ -96,15 +97,23 @@ let updateTypeVoucher = (data) => {
                     typeVoucher.value = data.value;
                     typeVoucher.maxValue = data.maxValue;
                     typeVoucher.minValue = data.minValue;
-                    await typeVoucher.save()
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Cập nhật thông tin loại giảm giá thành công!'
-                    })
+                    let res = await typeVoucher.save()
+                    if (res) {
+                        resolve({
+                            errCode: 0,
+                            errMessage: Message.TypeVoucher.up
+                        })
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: Message.TypeVoucher.upFail
+                        })
+                    }
+
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy loại giảm giá để chỉnh sửa!'
+                        errMessage: Message.TypeVoucher.errCode2
                     })
                 }
             }
@@ -120,27 +129,43 @@ let deleteTypeVoucher = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let typeVoucher = await db.TypeVoucher.findOne({
                     where: { id: data.id }
                 })
                 if (typeVoucher) {
-                    let res = await db.TypeVoucher.destroy({
-                        where: { id: data.id }
+                    let voucher = await db.Voucher.findOne({
+                        where: { typeVoucherId: data.id }
                     })
-                    if (!res) {
-                        resolve({
-                            errCode: 2,
-                            errMessage: 'Xoá loại giảm giá thất bại!'
+                    if (!voucher) {
+                        let res = await db.TypeVoucher.destroy({
+                            where: { id: data.id }
                         })
+                        if (!res) {
+                            resolve({
+                                errCode: 3,
+                                errMessage: Message.TypeVoucher.dltFail
+                            })
+                        } else {
+                            resolve({
+                                errCode: 0,
+                                errMessage: Message.TypeVoucher.dlt
+                            })
+                        }
                     } else {
                         resolve({
-                            errCode: 0,
-                            errMessage: 'Xoá loại giảm giá thành công!'
+                            errCode: 4,
+                            errMessage: Message.TypeVoucher.used
                         })
                     }
+
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: Message.TypeVoucher.errCode2
+                    })
                 }
             }
 

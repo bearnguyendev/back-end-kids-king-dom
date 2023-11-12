@@ -1,5 +1,5 @@
 import commentService from '../services/commentService'
-
+import { Message } from "../config/message";
 let createNewComment = async (req, res) => {
     try {
         let data = await commentService.createNewComment(req.body);
@@ -8,7 +8,7 @@ let createNewComment = async (req, res) => {
         console.log(error)
         return res.status(200).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -21,7 +21,7 @@ let getAllCommentByProductId = async (req, res) => {
         console.log(error)
         return res.status(200).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -34,7 +34,7 @@ let ReplyComment = async (req, res) => {
         console.log(error)
         return res.status(200).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -47,7 +47,7 @@ let deleteComment = async (req, res) => {
         console.log(error)
         return res.status(200).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

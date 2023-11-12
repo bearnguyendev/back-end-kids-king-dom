@@ -1,5 +1,5 @@
 import typeShipService from '../services/typeShipService';
-
+import { Message } from "../config/message";
 let createNewTypeShip = async (req, res) => {
     try {
         let data = await typeShipService.createNewTypeShip(req.body);
@@ -8,7 +8,7 @@ let createNewTypeShip = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -20,7 +20,7 @@ let getDetailTypeShipById = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -32,7 +32,7 @@ let getAllTypeShip = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -48,7 +48,7 @@ let getListTypeShip = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -60,7 +60,7 @@ let updateTypeShip = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -72,7 +72,7 @@ let deleteTypeShip = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

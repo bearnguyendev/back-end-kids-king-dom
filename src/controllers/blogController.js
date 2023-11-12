@@ -1,5 +1,5 @@
 import blogService from '../services/blogService';
-
+import { Message } from "../config/message";
 let createNewBlog = async (req, res) => {
     try {
         let data = await blogService.createNewBlog(req.body);
@@ -8,7 +8,7 @@ let createNewBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -20,7 +20,7 @@ let getDetailBlogById = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -32,7 +32,7 @@ let getAllBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -48,7 +48,7 @@ let getListBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -60,7 +60,7 @@ let updateBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -72,7 +72,7 @@ let deleteBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }
@@ -84,7 +84,7 @@ let changeStatusBlog = async (req, res) => {
         console.log(error)
         return res.status(500).json({
             errCode: -1,
-            errMessage: 'Lỗi từ máy chủ!'
+            errMessage: Message.errCode500
         })
     }
 }

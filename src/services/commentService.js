@@ -1,13 +1,13 @@
 import db from "../models/index";
 require('dotenv').config();
-
+import { Message } from "../config/message";
 let createNewComment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.content || !data.productId || !data.userId || !data.star) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Comment.create({
@@ -20,12 +20,12 @@ let createNewComment = (data) => {
                 if (res) {
                     resolve({
                         errCode: 0,
-                        errMessage: 'Bình luận thành công!'
+                        errMessage: Message.Comment.add
                     })
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: 'Bình luận thất bại!'
+                        errCode: 3,
+                        errMessage: Message.Comment.addFail
                     })
                 }
             }
@@ -40,7 +40,7 @@ let getAllCommentByProductId = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Comment.findAll({
@@ -82,7 +82,7 @@ let ReplyComment = (data) => {
             if (!data.content || !data.productId || !data.userId || !data.parentId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Comment.create({
@@ -94,12 +94,12 @@ let ReplyComment = (data) => {
                 if (res) {
                     resolve({
                         errCode: 0,
-                        errMessage: 'Phản hồi bình luận thành công!'
+                        errMessage: Message.Comment.reply
                     })
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: 'Phản hồi bình luận thất bại!'
+                        errCode: 3,
+                        errMessage: Message.Comment.replyFail
                     })
                 }
             }
@@ -114,7 +114,7 @@ let deleteComment = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let review = await db.Comment.findOne({
@@ -127,12 +127,12 @@ let deleteComment = (data) => {
                     if (res) {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Xoá bình luận thành công!'
+                            errMessage: Message.Comment.delete
                         })
                     } else {
                         resolve({
-                            errCode: 0,
-                            errMessage: 'Xoá bình luận thất bại!'
+                            errCode: 3,
+                            errMessage: Message.Comment.deleteFail
                         })
                     }
                 }

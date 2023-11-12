@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import emailService from "./emailService";
 import { v4 as uuidv4 } from 'uuid';
 require('dotenv').config();
+import { Message } from "../config/message";
 const salt = bcrypt.genSaltSync(10);
 let hashUserPassword = (password) => {
     return new Promise(async (resolve, reject) => {
@@ -21,7 +22,7 @@ let checkUserEmail = (userEmail) => {
             if (regex.test(userEmail) === false) {
                 resolve({
                     isValidEmail: 1,
-                    errMessage: "Email không hợp lệ!"
+                    errMessage: Message.email.e1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -30,7 +31,7 @@ let checkUserEmail = (userEmail) => {
                 if (user) {
                     resolve({
                         isValidEmail: 2,
-                        errMessage: 'Email của bạn đã được sử dụng. Vui lòng thử một email khác!'
+                        errMessage: Message.email.e2
                     });
                 } else {
                     resolve({ isValidEmail: 0 });
@@ -55,17 +56,17 @@ let validatePassword = (passwordInputValue) => {
     const minLengthPassword = minLengthRegExp.test(passwordInputValue);
     let errMessage = "";
     if (passwordLength === 0) {
-        errMessage = "Mật khẩu không được để trống";
+        errMessage = Message.password.e1;
     } else if (!uppercasePassword) {
-        errMessage = "Mật khẩu phải có ít nhất một chữ in hoa";
+        errMessage = Message.password.e2;
     } else if (!lowercasePassword) {
-        errMessage = "Mật khẩu phải có ít nhất một chữ thường";
+        errMessage = Message.password.e3;
     } else if (!digitsPassword) {
-        errMessage = "Mật khẩu phải có ít nhất một chữ số";
+        errMessage = Message.password.e4;
     } else if (!specialCharPassword) {
-        errMessage = "Mật khẩu phải có ít nhất một ký tự đặc biệt";
+        errMessage = Message.password.e5;
     } else if (!minLengthPassword) {
-        errMessage = "Mật khẩu phải có ít nhất 8 ký tự";
+        errMessage = Message.password.e6;
     } else {
         errMessage = "";
     }
@@ -76,7 +77,7 @@ let validatePhoneNumber = (phoneNumber) => {
     const check = regExp.test(phoneNumber)
     let errMessage = "";
     if (!check) {
-        errMessage = "Số điện thoại của bạn không đúng định dạng!"
+        errMessage = "Số điện thoại không đúng định dạng!"
     } else {
         errMessage = "";
     }
@@ -88,7 +89,7 @@ let createANewUser = (data) => {
             if (!data.email || !data.password || !data.firstName || !data.lastName || !data.phoneNumber || !data.genderId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let check = await checkUserEmail(data.email);
@@ -120,7 +121,7 @@ let createANewUser = (data) => {
                             })
                             resolve({
                                 errCode: 0,
-                                errMessage: "Thêm mới người dùng thành công!"
+                                errMessage: Message.User.add
                             })
                         } else {
                             resolve({
@@ -148,7 +149,7 @@ let getAllUsers = (statusId) => {
             if (!statusId) {
                 return res.status(500).json({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!',
+                    errMessage: Message.errCode1,
                     data: []
                 });
             }
@@ -195,7 +196,7 @@ let getDetailUserById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let data = await db.User.findOne({
@@ -232,7 +233,7 @@ let editAUser = (data) => {
             if (!data.id || !data.firstName || !data.lastName || !data.address || !data.birthday || !data.phoneNumber) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -255,7 +256,7 @@ let editAUser = (data) => {
                         await user.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Cập nhật thông tin thành công!'
+                            errMessage: Message.User.up
                         })
                     } else {
                         resolve({
@@ -266,7 +267,7 @@ let editAUser = (data) => {
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
 
@@ -282,7 +283,7 @@ let deleteAUser = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -291,16 +292,23 @@ let deleteAUser = (id) => {
                 if (!user) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
-                await db.User.destroy({
+                let res = await db.User.destroy({
                     where: { id: id }
                 });
-                resolve({
-                    errCode: 0,
-                    errMessage: 'Xoá người dùng thành công!'
-                })
+                if (res) {
+                    resolve({
+                        errCode: 0,
+                        errMessage: Message.User.dlt
+                    })
+                } else {
+                    resolve({
+                        errCode: 3,
+                        errMessage: Message.User.dltFail
+                    })
+                }
             }
         } catch (error) {
             reject(error)
@@ -313,7 +321,7 @@ let handleLogin = (data) => {
             if (!data.email || !data.password) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let userData = {};
@@ -331,20 +339,20 @@ let handleLogin = (data) => {
                         if (check) {
                             if (user.statusId === 'S1') {
                                 userData.errCode = 0;
-                                userData.errMessage = 'Ok';
+                                userData.errMessage = Message.User.ok;
                                 delete user.password;
                                 userData.user = user;
                             } else {
                                 userData.errCode = 3;
-                                userData.errMessage = 'Tài khoản của bạn đã bị vô hiệu hoá!';
+                                userData.errMessage = Message.User.block;
                             }
                         } else {
-                            userData.errCode = 2;
-                            userData.errMessage = 'Sai mật khẩu!';
+                            userData.errCode = 4;
+                            userData.errMessage = Message.User.wrongPassword;
                         }
                     } else {
-                        userData.errCode = 4;
-                        userData.errMessage = 'Không tìm thấy người dùng!'
+                        userData.errCode = 2;
+                        userData.errMessage = Message.User.errCode2
                     }
                 } else {
                     if (check.isValidEmail === 1) {
@@ -352,7 +360,7 @@ let handleLogin = (data) => {
                         userData.errMessage = check.errMessage
                     } else {
                         userData.errCode = 5;
-                        userData.errMessage = `Email của bạn không tồn tại trong hệ thống. Vui lòng thử một email khác!`
+                        userData.errMessage = Message.User.noEmail
                     }
 
                 }
@@ -369,7 +377,7 @@ let handleChangePassword = (data) => {
             if (!data.id || !data.oldPassword || !data.newPassword) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -385,7 +393,7 @@ let handleChangePassword = (data) => {
                             await user.save();
                             resolve({
                                 errCode: 0,
-                                errMessage: 'Thay đổi mật khẩu thành công!'
+                                errMessage: Message.User.upPassword
                             })
                         } else {
                             resolve({
@@ -395,14 +403,14 @@ let handleChangePassword = (data) => {
                         }
                     } else {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Mật khẩu cũ không chính xác'
+                            errCode: 4,
+                            errMessage: Message.User.wrongOldPass
                         })
                     }
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errCode: 2,
+                        errMessage: Message.User.errCode2
                     })
                 }
             }
@@ -417,7 +425,7 @@ let sendVerifyEmail = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -440,12 +448,12 @@ let sendVerifyEmail = (data) => {
                     await user.save();
                     resolve({
                         errCode: 0,
-                        errMessage: 'Ok'
+                        errMessage: Message.User.ok
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
             }
@@ -460,7 +468,7 @@ let handleVerifyEmail = (data) => {
             if (!data.userId || !data.token) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -479,13 +487,13 @@ let handleVerifyEmail = (data) => {
                     await user.save();
                     resolve({
                         errCode: 0,
-                        errMessage: 'Ok'
+                        errMessage: Message.User.ok
                     })
 
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
             }
@@ -500,7 +508,7 @@ let sendForgotPassword = (email) => {
             if (!email) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.User.enterEmail
                 })
             } else {
                 let user = await db.User.findOne({
@@ -523,12 +531,12 @@ let sendForgotPassword = (email) => {
                     await user.save();
                     resolve({
                         errCode: 0,
-                        errMessage: 'Ok'
+                        errMessage: Message.User.ok
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: `Email của bạn không tồn tại trong hệ thống. Vui lòng thử một email khác!`
+                        errMessage: Message.User.noEmail
                     })
                 }
             }
@@ -543,7 +551,7 @@ let handleResetPassword = (data) => {
             if (!data.userId || !data.token || !data.newPassword) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -557,8 +565,8 @@ let handleResetPassword = (data) => {
                     let check = await bcrypt.compareSync(data.newPassword, user.password)
                     if (check) {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Mật khẩu mới không được trùng với mật khẩu cũ'
+                            errCode: 3,
+                            errMessage: Message.User.newNotSameOld
                         })
                     } else {
                         let isValidPw = validatePassword(data.newPassword);
@@ -568,7 +576,7 @@ let handleResetPassword = (data) => {
                             await user.save();
                             resolve({
                                 errCode: 0,
-                                errMessage: 'Ok'
+                                errMessage: Message.User.ok
                             })
                         } else {
                             resolve({
@@ -580,7 +588,7 @@ let handleResetPassword = (data) => {
                 } else {
                     resolve({
                         errCode: 3,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
             }
@@ -595,7 +603,7 @@ let changeStatusUser = (data) => {
             if (!data.id || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let user = await db.User.findOne({
@@ -608,7 +616,7 @@ let changeStatusUser = (data) => {
                         await user.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Vô hiệu hoá người dùng thành công!'
+                            errMessage: Message.User.ban
                         })
                     }
                     if (data.type === 'PERMIT') {
@@ -616,15 +624,44 @@ let changeStatusUser = (data) => {
                         await user.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Mở khoá người dùng thành công!'
+                            errMessage: Message.User.permit
                         })
                     }
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy người dùng!'
+                        errMessage: Message.User.errCode2
                     })
                 }
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+let upsertUserSocialMedia = (typeAcc, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let user = null
+            if (typeAcc === 'GOOGLE') {
+                const [res, created] = await db.User.findOrCreate({
+                    where: {
+                        email: data.email,
+                        type: typeAcc
+                    },
+                    defaults: {
+                        email: data.email,
+                        lastName: data.userName,
+                        type: typeAcc
+                    }
+                })
+                user = res
+                console.log("check user: ", user);
+                // resolve({
+                //     errCode: 0,
+                //     user
+                // })
+
             }
         } catch (error) {
             reject(error)

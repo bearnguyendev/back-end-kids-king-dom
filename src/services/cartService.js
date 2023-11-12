@@ -1,11 +1,12 @@
 import db from "../models/index";
+import { Message } from "../config/message";
 let addItemCart = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.userId || !data.quantity || !data.productId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let cart = await db.Cart.findOne({
@@ -32,7 +33,7 @@ let addItemCart = (data) => {
                             await cart.save()
                             resolve({
                                 errCode: 0,
-                                errMessage: `Cập nhật số lượng sản phẩm thành công`,
+                                errMessage: Message.Cart.up,
                             })
                         }
                     } else {
@@ -69,7 +70,7 @@ let addItemCart = (data) => {
                 }
                 resolve({
                     errCode: 0,
-                    errMessage: 'Thêm sản phẩm vào giỏ hàng thành công!'
+                    errMessage: Message.Cart.add
                 })
             }
         } catch (error) {
@@ -83,7 +84,7 @@ let getAllCartByUserId = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.User.findOne({
@@ -115,8 +116,8 @@ let getAllCartByUserId = (id) => {
                     })
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: "Không tìm thấy!"
+                        errCode: 3,
+                        errMessage: Message.Cart.notFound
                     })
 
                 }
@@ -132,7 +133,7 @@ let deleteItemCart = (data) => {
             if (!data.productId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Cart.findOne({ where: { productId: data.productId, statusId: 0 } })
@@ -142,12 +143,12 @@ let deleteItemCart = (data) => {
                     })
                     resolve({
                         errCode: 0,
-                        errMessage: `Xoá sản phẩm khỏi giỏ hàng thành công!`
+                        errMessage: Message.Cart.deleteItem
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: `Không tìm thấy sản phẩm trong giỏ hàng!`
+                        errMessage: Message.Cart.errCode2
                     })
                 }
             }
@@ -162,7 +163,7 @@ let deleteItemCartByUserId = (data) => {
             if (!data.userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Cart.findAll({ where: { userId: data.userId, statusId: 0 } })
@@ -172,12 +173,12 @@ let deleteItemCartByUserId = (data) => {
                     })
                     resolve({
                         errCode: 0,
-                        errMessage: `Xoá giỏ hàng thành công!`
+                        errMessage: Message.Cart.delete
                     })
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: `Không tìm thấy sản phẩm trong giỏ hàng!`
+                        errMessage: Message.Cart.errCode2
                     })
                 }
             }

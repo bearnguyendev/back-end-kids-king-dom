@@ -1,13 +1,13 @@
 import db from "../models/index";
 require('dotenv').config();
-
+import { Message } from "../config/message";
 let createNewBanner = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.image || !data.description || !data.name) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 await db.Banner.create({
@@ -18,7 +18,7 @@ let createNewBanner = (data) => {
                 })
                 resolve({
                     errCode: 0,
-                    errMessage: 'Tạo mới biểu ngữ thành công!'
+                    errMessage: Message.Banner.add
                 })
             }
         } catch (error) {
@@ -32,7 +32,7 @@ let getDetailBannerById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Banner.findOne({
@@ -74,7 +74,7 @@ let getListBanner = (limit) => {
             if (!limit) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Banner.findAll({
@@ -102,7 +102,7 @@ let updateBanner = (data) => {
             if (!data.id || !data.image || !data.description || !data.name) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let banner = await db.Banner.findOne({
@@ -116,7 +116,12 @@ let updateBanner = (data) => {
                     await banner.save()
                     resolve({
                         errCode: 0,
-                        errMessage: 'Cập nhật thông tin biểu ngữ thành công!'
+                        errMessage: Message.Banner.update
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: Message.Banner.errCode2
                     })
                 }
             }
@@ -132,7 +137,7 @@ let deleteBanner = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let banner = await db.Banner.findOne({
@@ -144,7 +149,12 @@ let deleteBanner = (data) => {
                     })
                     resolve({
                         errCode: 0,
-                        errMessage: 'Xoá biểu ngữ thành công!'
+                        errMessage: Message.Banner.delete
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: Message.Banner.errCode2
                     })
                 }
             }
@@ -159,7 +169,7 @@ let changeStatusBanner = (data) => {
             if (!data.id || !data.type) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let banner = await db.Banner.findOne({
@@ -172,7 +182,7 @@ let changeStatusBanner = (data) => {
                         await banner.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Ẩn biểu ngữ thành công!'
+                            errMessage: Message.Banner.hidden
                         })
                     }
                     if (data.type === 'PERMIT') {
@@ -180,13 +190,13 @@ let changeStatusBanner = (data) => {
                         await banner.save();
                         resolve({
                             errCode: 0,
-                            errMessage: 'Hiện biểu ngữ thành công!'
+                            errMessage: Message.Banner.show
                         })
                     }
                 } else {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Không tìm thấy biểu ngữ!'
+                        errMessage: Message.Banner.errCode2
                     })
                 }
             }

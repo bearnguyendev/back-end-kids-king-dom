@@ -1,12 +1,13 @@
 import _ from "lodash";
 import db from "../models/index";
+import { Message } from "../config/message";
 let createNewVoucher = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.fromDate || !data.toDate || !data.typeVoucherId || !data.number || !data.codeVoucher) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 const [res, created] = await db.Voucher.findOrCreate({
@@ -29,7 +30,7 @@ let createNewVoucher = (data) => {
                 } else {
                     resolve({
                         errCode: 0,
-                        errMessage: 'Thêm mới mã giảm giá thành công!'
+                        errMessage: Message.Voucher.add
                     })
                 }
             }
@@ -44,7 +45,7 @@ let getDetailVoucherById = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.Voucher.findOne({
@@ -57,8 +58,8 @@ let getDetailVoucherById = (id) => {
                     })
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: "Không tìm thấy mã giảm giá!"
+                        errCode: 2,
+                        errMessage: Message.Voucher.errCode2
                     })
                 }
 
@@ -100,7 +101,7 @@ let updateVoucher = (data) => {
             if (!data.id || !data.fromDate || !data.toDate || !data.typeVoucherId || !data.number || !data.codeVoucher) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let voucher = await db.Voucher.findOne({
@@ -116,19 +117,19 @@ let updateVoucher = (data) => {
                     let res = await voucher.save()
                     if (!res) {
                         resolve({
-                            errCode: 2,
-                            errMessage: 'Cập nhật mã giảm giá thất bại!'
+                            errCode: 3,
+                            errMessage: Message.Voucher.upFail
                         })
                     } else {
                         resolve({
                             errCode: 0,
-                            errMessage: 'Cập nhật mã giảm giá thành công!'
+                            errMessage: Message.Voucher.up
                         })
                     }
                 } else {
                     resolve({
-                        errCode: 3,
-                        errMessage: 'Không tìm thấy mã giảm giá!'
+                        errCode: 2,
+                        errMessage: Message.Voucher.errCode2
                     })
                 }
             }
@@ -143,7 +144,7 @@ let deleteVoucher = (data) => {
             if (!data.id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let checkVoucherUsed = await db.VoucherUsed.findOne({
@@ -152,7 +153,7 @@ let deleteVoucher = (data) => {
                 if (checkVoucherUsed) {
                     resolve({
                         errCode: 3,
-                        errMessage: 'Không thể xoá mã giảm giá đã được sử dụng!'
+                        errMessage: Message.Voucher.used
                     })
                 } else {
                     let voucher = await db.Voucher.findOne({
@@ -164,19 +165,19 @@ let deleteVoucher = (data) => {
                         })
                         if (!res) {
                             resolve({
-                                errCode: 2,
-                                errMessage: 'Xoá mã giảm giá thất bại!'
+                                errCode: 3,
+                                errMessage: Message.Voucher.dltFail
                             })
                         } else {
                             resolve({
                                 errCode: 0,
-                                errMessage: 'Xoá mã giảm giá thành công!'
+                                errMessage: Message.Voucher.dlt
                             })
                         }
                     } else {
                         resolve({
-                            errCode: 3,
-                            errMessage: 'Không tìm thấy mã giảm giá!'
+                            errCode: 2,
+                            errMessage: Message.Voucher.errCode2
                         })
                     }
                 }
@@ -192,7 +193,7 @@ let saveUserVoucher = (data) => {
             if (!data.voucherId || !data.userId) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 const [res, created] = await db.VoucherUsed.findOrCreate({
@@ -205,7 +206,7 @@ let saveUserVoucher = (data) => {
                 if (!created) {
                     resolve({
                         errCode: 2,
-                        errMessage: 'Bạn đã lưu mã giảm giá này!'
+                        errMessage: Message.Voucher.saved
                     })
                 } else {
                     let voucher = await db.Voucher.findOne({
@@ -218,7 +219,7 @@ let saveUserVoucher = (data) => {
                     await voucher.save()
                     resolve({
                         errCode: 0,
-                        errMessage: 'Lưu mã giảm giá thành công!'
+                        errMessage: Message.Voucher.save
                     })
                 }
             }
@@ -233,7 +234,7 @@ let getAllVoucherByUserId = (id) => {
             if (!id) {
                 resolve({
                     errCode: 1,
-                    errMessage: 'Thiếu các thông số bắt buộc!'
+                    errMessage: Message.errCode1
                 })
             } else {
                 let res = await db.User.findOne({
@@ -258,8 +259,8 @@ let getAllVoucherByUserId = (id) => {
                     })
                 } else {
                     resolve({
-                        errCode: 0,
-                        errMessage: "Không tìm thấy mã giảm giá người dùng đã sử dụng!"
+                        errCode: 3,
+                        errMessage: Message.Voucher.noVoucherOfUserUsed
                     })
                 }
             }

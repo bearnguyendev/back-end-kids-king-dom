@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             Allcode.hasMany(models.User, { foreignKey: 'genderId', as: 'genderData' })
             Allcode.hasMany(models.User, { foreignKey: 'roleId', as: 'roleData' })
+            Allcode.hasMany(models.User, { foreignKey: 'typeId', as: 'typeData' })
             Allcode.hasMany(models.Product, { foreignKey: 'categoryId', as: 'categoryData' })
             Allcode.hasMany(models.Product, { foreignKey: 'brandId', as: 'brandData' })
             Allcode.hasMany(models.Product, { foreignKey: 'statusId', as: 'statusData' })
@@ -23,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
     Allcode.init({
         keyMap: DataTypes.STRING,
         type: DataTypes.STRING,
-        value: DataTypes.STRING
+        value: DataTypes.STRING,
+        status: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'Allcode',
